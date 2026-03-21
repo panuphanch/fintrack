@@ -79,12 +79,12 @@ export default function LoginPage() {
               disabled={isLoggingIn}
               className="btn-primary w-full"
             >
-              {isLoggingIn ? 'Signing in...' : 'Sign in'}
+              {isLoggingIn ? 'Signing in\u2026' : 'Sign in'}
             </button>
           </div>
 
           <p className="text-center text-sm text-[#a8a29e]">
-            Don't have an account?{' '}
+            Don\u2019t have an account?{' '}
             <Link to="/register" className="font-medium text-gold-400 hover:text-gold-300">
               Create one
             </Link>

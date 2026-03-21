@@ -5,13 +5,14 @@ interface ErrorMessageProps {
 
 export default function ErrorMessage({ message, onRetry }: ErrorMessageProps) {
   return (
-    <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-4">
+    <div className="rounded-xl bg-red-500/10 border border-red-500/20 p-4" role="alert">
       <div className="flex">
         <div className="flex-shrink-0">
           <svg
             className="h-5 w-5 text-red-400"
             viewBox="0 0 20 20"
             fill="currentColor"
+            aria-hidden="true"
           >
             <path
               fillRule="evenodd"

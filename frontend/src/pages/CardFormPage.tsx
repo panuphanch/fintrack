@@ -140,6 +140,7 @@ export default function CardFormPage() {
               id="lastFour"
               type="text"
               required
+              inputMode="numeric"
               maxLength={4}
               pattern="\d{4}"
               value={formData.lastFour}
@@ -202,12 +203,13 @@ export default function CardFormPage() {
         </div>
 
         <div>
-          <label className="label">Card Color</label>
+          <span className="label">Card Color</span>
           <div className="flex flex-wrap gap-2">
             {CARD_COLORS.map((color) => (
               <button
                 key={color}
                 type="button"
+                aria-label={`Select color ${color}`}
                 onClick={() => setFormData({ ...formData, color })}
                 className={`w-8 h-8 rounded-full border-2 transition-transform ${
                   formData.color === color ? 'border-gold-400 ring-2 ring-gold-400/30 scale-110' : 'border-transparent'
@@ -238,7 +240,7 @@ export default function CardFormPage() {
             Cancel
           </Link>
           <button type="submit" disabled={isPending} className="btn-primary">
-            {isPending ? 'Saving...' : isEditing ? 'Update Card' : 'Add Card'}
+            {isPending ? 'Saving\u2026' : isEditing ? 'Update Card' : 'Add Card'}
           </button>
         </div>
       </form>

@@ -221,6 +221,7 @@ export default function TransactionFormPage() {
               id="merchant"
               type="text"
               required
+              autoComplete="off"
               value={formData.merchant}
               onChange={(e) => setFormData({ ...formData, merchant: e.target.value })}
               className="input-field"
@@ -286,13 +287,13 @@ export default function TransactionFormPage() {
             value={formData.notes}
             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
             className="input-field"
-            placeholder="Additional details..."
+            placeholder="Additional details\u2026"
           />
         </div>
 
         {/* Tags */}
         <div>
-          <label className="label">Tags</label>
+          <span className="label">Tags</span>
           <div className="flex flex-wrap gap-2 mb-2">
             {tags?.map((tag) => (
               <button
@@ -312,6 +313,8 @@ export default function TransactionFormPage() {
           <div className="flex gap-2">
             <input
               type="text"
+              name="newTag"
+              aria-label="New tag name"
               value={newTagName}
               onChange={(e) => setNewTagName(e.target.value)}
               placeholder="New tag name"
@@ -336,7 +339,7 @@ export default function TransactionFormPage() {
 
         {/* Receipt Upload */}
         <div>
-          <label className="label">Receipt (optional)</label>
+          <span className="label">Receipt (optional)</span>
           <div className="flex gap-2">
             <input
               ref={fileInputRef}
@@ -352,17 +355,19 @@ export default function TransactionFormPage() {
                 disabled={isScanning}
                 className="btn-secondary"
               >
-                {isScanning ? 'Scanning...' : 'Scan OCR'}
+                {isScanning ? 'Scanning\u2026' : 'Scan OCR'}
               </button>
             )}
           </div>
-          {isUploading && <p className="mt-1 text-sm text-[#6b6560]">Uploading...</p>}
+          {isUploading && <p className="mt-1 text-sm text-[#6b6560]">Uploading\u2026</p>}
           {formData.receiptUrl && (
             <div className="mt-2">
               <img
                 src={formData.receiptUrl}
                 alt="Receipt"
-                className="max-h-48 rounded border"
+                width={192}
+                height={192}
+                className="max-h-48 w-auto rounded border"
               />
             </div>
           )}
@@ -373,7 +378,7 @@ export default function TransactionFormPage() {
             Cancel
           </Link>
           <button type="submit" disabled={isPending} className="btn-primary">
-            {isPending ? 'Saving...' : isEditing ? 'Update' : 'Add Transaction'}
+            {isPending ? 'Saving\u2026' : isEditing ? 'Update' : 'Add Transaction'}
           </button>
         </div>
       </form>

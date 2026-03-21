@@ -35,7 +35,9 @@
 @layer components {
   .btn-primary {
     @apply px-4 py-2.5 bg-gold-400 text-dark font-semibold rounded-lg
-           hover:bg-gold-300 active:bg-gold-500 transition-all duration-200
+           hover:bg-gold-300 active:bg-gold-500
+           transition-[background-color,box-shadow,opacity] duration-200
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/50 focus-visible:ring-offset-0
            disabled:opacity-50 disabled:cursor-not-allowed
            shadow-glow-sm hover:shadow-glow;
   }
@@ -43,20 +45,24 @@
   .btn-secondary {
     @apply px-4 py-2.5 bg-surface-alt text-[#a8a29e] font-medium rounded-lg
            border border-white/10 hover:bg-surface-elevated hover:text-[#f0ece4]
-           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+           transition-[background-color,border-color,color,opacity] duration-200
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-400/50 focus-visible:ring-offset-0
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .btn-danger {
     @apply px-4 py-2.5 bg-red-500/20 text-red-400 font-medium rounded-lg
            border border-red-500/20 hover:bg-red-500/30 hover:border-red-500/40
-           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+           transition-[background-color,border-color,color,opacity] duration-200
+           focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500/50 focus-visible:ring-offset-0
+           disabled:opacity-50 disabled:cursor-not-allowed;
   }
 
   .input-field {
     @apply w-full px-3 py-2.5 bg-surface-alt border border-white/10 rounded-lg
            text-[#f0ece4] placeholder-[#6b6560]
            focus:outline-none focus:ring-2 focus:ring-gold-400/50 focus:border-gold-400/30
-           transition-all duration-200;
+           transition-[border-color,box-shadow,opacity] duration-200;
   }
 
   .input-error {

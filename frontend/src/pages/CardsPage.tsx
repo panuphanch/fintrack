@@ -57,6 +57,7 @@ export default function CardsPage() {
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -94,6 +95,7 @@ export default function CardsPage() {
                     <Link
                       to={`/cards/${card.id}/edit`}
                       className="text-[#6b6560] hover:text-[#a8a29e]"
+                      aria-label="Edit card"
                     >
                       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
@@ -107,6 +109,7 @@ export default function CardsPage() {
                     <button
                       onClick={() => setCardToDelete(card)}
                       className="text-[#6b6560] hover:text-red-400"
+                      aria-label="Delete card"
                     >
                       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
@@ -168,6 +171,7 @@ export default function CardsPage() {
                       <Link
                         to={`/cards/${card.id}/edit`}
                         className="text-[#6b6560] hover:text-[#a8a29e]"
+                        aria-label="Edit card"
                       >
                         <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path

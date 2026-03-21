@@ -49,6 +49,7 @@ export default function RegisterPage() {
                 name="name"
                 type="text"
                 required
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="input-field"
@@ -117,7 +118,7 @@ export default function RegisterPage() {
               disabled={isRegistering}
               className="btn-primary w-full"
             >
-              {isRegistering ? 'Creating account...' : 'Create account'}
+              {isRegistering ? 'Creating account\u2026' : 'Create account'}
             </button>
           </div>
 

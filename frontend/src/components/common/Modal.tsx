@@ -24,7 +24,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
           <div className="fixed inset-0 bg-black/60 backdrop-blur-sm" />
         </TransitionChild>
 
-        <div className="fixed inset-0 overflow-y-auto">
+        <div className="fixed inset-0 overflow-y-auto" style={{ overscrollBehavior: 'contain' }}>
           <div className="flex min-h-full items-center justify-center p-4 text-center">
             <TransitionChild
               as={Fragment}
@@ -35,7 +35,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-xl bg-surface-elevated border border-white/10 p-6 text-left align-middle shadow-xl transition-all" onClick={(e) => e.stopPropagation()}>
+              <DialogPanel className="w-full max-w-md transform overflow-hidden rounded-xl bg-surface-elevated border border-white/10 p-6 text-left align-middle shadow-xl transition-[transform,opacity]" onClick={(e) => e.stopPropagation()}>
                 <DialogTitle as="h3" className="text-lg font-display font-bold leading-6 text-[#f0ece4]">
                   {title}
                 </DialogTitle>

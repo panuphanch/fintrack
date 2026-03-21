@@ -62,7 +62,7 @@ export function formatPercentage(value: number): string {
  */
 export function truncate(text: string, maxLength: number): string {
   if (text.length <= maxLength) return text;
-  return text.slice(0, maxLength - 3) + '...';
+  return text.slice(0, maxLength - 1) + '\u2026';
 }
 
 /**

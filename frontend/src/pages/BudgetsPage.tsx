@@ -119,6 +119,7 @@ export default function BudgetsPage() {
                     <button
                       onClick={() => openEditModal(budget)}
                       className="text-[#6b6560] hover:text-[#a8a29e]"
+                      aria-label="Edit budget"
                     >
                       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
@@ -132,6 +133,7 @@ export default function BudgetsPage() {
                     <button
                       onClick={() => setBudgetToDelete(budget)}
                       className="text-[#6b6560] hover:text-red-400"
+                      aria-label="Delete budget"
                     >
                       <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path
@@ -177,6 +179,7 @@ export default function BudgetsPage() {
             fill="none"
             viewBox="0 0 24 24"
             stroke="currentColor"
+            aria-hidden="true"
           >
             <path
               strokeLinecap="round"
@@ -251,7 +254,7 @@ export default function BudgetsPage() {
               Cancel
             </button>
             <button type="submit" disabled={isPending} className="btn-primary">
-              {isPending ? 'Saving...' : editingBudget ? 'Update' : 'Set Budget'}
+              {isPending ? 'Saving\u2026' : editingBudget ? 'Update' : 'Set Budget'}
             </button>
           </div>
         </form>

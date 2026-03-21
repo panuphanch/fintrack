@@ -24,7 +24,7 @@ export default function ToggleSwitch({ checked, onChange, disabled = false, labe
       <span
         className={`
           pointer-events-none inline-block h-5 w-5 transform rounded-full bg-[#f0ece4] shadow ring-0
-          transition duration-200 ease-in-out
+          transition-transform duration-200 ease-in-out
           ${checked ? 'translate-x-5' : 'translate-x-0'}
         `}
       />

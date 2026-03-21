@@ -139,6 +139,7 @@ export default function InstallmentsPage() {
           <label className="flex items-center gap-2 text-sm text-[#a8a29e]">
             <input
               type="checkbox"
+              name="showCompleted"
               checked={showInactive}
               onChange={(e) => setShowInactive(e.target.checked)}
               className="rounded border-white/10 text-blue-600 focus:ring-blue-500"
@@ -201,7 +202,7 @@ export default function InstallmentsPage() {
                                 <CategoryBadge category={installment.category} />
                               )}
                             </td>
-                            <td className="px-4 py-3 text-right font-medium text-[#f0ece4]">
+                            <td className="px-4 py-3 text-right font-medium text-[#f0ece4] tabular-nums">
                               {formatTHB(installment.monthlyAmount)}
                             </td>
                             <td className="px-4 py-3">
@@ -232,6 +233,7 @@ export default function InstallmentsPage() {
                                 <button
                                   onClick={() => openEditModal(installment)}
                                   className="text-[#6b6560] hover:text-[#a8a29e]"
+                                  aria-label="Edit installment"
                                 >
                                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -240,6 +242,7 @@ export default function InstallmentsPage() {
                                 <button
                                   onClick={() => setInstallmentToDelete(installment)}
                                   className="text-[#6b6560] hover:text-red-400"
+                                  aria-label="Delete installment"
                                 >
                                   <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -259,7 +262,7 @@ export default function InstallmentsPage() {
         </div>
       ) : (
         <div className="card text-center py-12">
-          <svg className="mx-auto h-12 w-12 text-[#6b6560]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="mx-auto h-12 w-12 text-[#6b6560]" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
           </svg>
           <h3 className="mt-2 text-sm font-medium text-[#f0ece4]">No installments</h3>
@@ -411,7 +414,7 @@ export default function InstallmentsPage() {
               value={formData.notes || ''}
               onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
               className="input-field"
-              placeholder="Any additional notes..."
+              placeholder="Any additional notes\u2026"
             />
           </div>
 
@@ -420,7 +423,7 @@ export default function InstallmentsPage() {
               Cancel
             </button>
             <button type="submit" disabled={isPending} className="btn-primary">
-              {isPending ? 'Saving...' : editingInstallment ? 'Update' : 'Add Installment'}
+              {isPending ? 'Saving\u2026' : editingInstallment ? 'Update' : 'Add Installment'}
             </button>
           </div>
         </form>

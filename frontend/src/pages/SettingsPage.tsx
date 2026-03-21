@@ -311,6 +311,7 @@ export default function SettingsPage() {
                     disabled={index === 0 || reorderCategories.isPending}
                     className="p-1 text-[#6b6560] hover:text-[#a8a29e] disabled:opacity-30"
                     title="Move up"
+                    aria-label="Move up"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
@@ -321,6 +322,7 @@ export default function SettingsPage() {
                     disabled={index === categories.length - 1 || reorderCategories.isPending}
                     className="p-1 text-[#6b6560] hover:text-[#a8a29e] disabled:opacity-30"
                     title="Move down"
+                    aria-label="Move down"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -332,6 +334,7 @@ export default function SettingsPage() {
                     onClick={() => openEditCategoryModal(category)}
                     className="p-1 text-[#6b6560] hover:text-[#a8a29e]"
                     title="Edit"
+                    aria-label="Edit category"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -344,6 +347,7 @@ export default function SettingsPage() {
                       onClick={() => setCategoryToDelete(category)}
                       className="p-1 text-[#6b6560] hover:text-red-400"
                       title="Delete"
+                      aria-label="Delete category"
                     >
                       <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -425,7 +429,7 @@ export default function SettingsPage() {
                 disabled={inviteMutation.isPending}
                 className="btn-primary"
               >
-                {inviteMutation.isPending ? 'Sending...' : 'Send Invitation'}
+                {inviteMutation.isPending ? 'Sending\u2026' : 'Send Invitation'}
               </button>
             </div>
           </form>
@@ -493,10 +497,11 @@ export default function SettingsPage() {
                   key={color}
                   type="button"
                   onClick={() => setCategoryForm({ ...categoryForm, color })}
-                  className={`w-8 h-8 rounded-full border-2 transition-all ${
+                  className={`w-8 h-8 rounded-full border-2 transition-[border-color,transform,box-shadow] ${
                     categoryForm.color === color ? 'border-gold-400 ring-2 ring-gold-400/30 scale-110' : 'border-transparent'
                   }`}
                   style={{ backgroundColor: color }}
+                  aria-label={`Select color ${color}`}
                 />
               ))}
             </div>
@@ -543,7 +548,7 @@ export default function SettingsPage() {
               Cancel
             </button>
             <button type="submit" disabled={isCategoryPending} className="btn-primary">
-              {isCategoryPending ? 'Saving...' : editingCategory ? 'Update' : 'Add Category'}
+              {isCategoryPending ? 'Saving\u2026' : editingCategory ? 'Update' : 'Add Category'}
             </button>
           </div>
         </form>

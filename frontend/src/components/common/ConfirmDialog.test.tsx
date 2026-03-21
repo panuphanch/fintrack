@@ -57,9 +57,9 @@ describe('ConfirmDialog', () => {
   it('should disable buttons when loading', () => {
     render(<ConfirmDialog {...defaultProps} isLoading={true} />);
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
+    expect(screen.getByText('Loading\u2026')).toBeInTheDocument();
     expect(screen.getByText('Cancel')).toBeDisabled();
-    expect(screen.getByText('Loading...')).toBeDisabled();
+    expect(screen.getByText('Loading\u2026')).toBeDisabled();
   });
 
   it('should apply danger variant class by default', () => {

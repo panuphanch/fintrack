@@ -76,7 +76,7 @@ export default function AcceptInvitePage() {
             Join {invite?.householdName}
           </h2>
           <p className="mt-2 text-center text-sm text-[#a8a29e]">
-            You've been invited to join a household on Financial Tracker
+            You\u2019ve been invited to join a household on Financial Tracker
           </p>
           <p className="mt-1 text-center text-sm text-[#6b6560]">
             Invitation sent to: {invite?.email}
@@ -104,6 +104,7 @@ export default function AcceptInvitePage() {
                 name="name"
                 type="text"
                 required
+                autoComplete="name"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 className="input-field"
@@ -136,7 +137,7 @@ export default function AcceptInvitePage() {
               disabled={acceptMutation.isPending}
               className="btn-primary w-full"
             >
-              {acceptMutation.isPending ? 'Joining...' : 'Join household'}
+              {acceptMutation.isPending ? 'Joining\u2026' : 'Join household'}
             </button>
           </div>
         </form>

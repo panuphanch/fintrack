@@ -70,7 +70,7 @@ export default function ConfirmDialog({
           onClick={handleConfirm}
           disabled={isLoading}
         >
-          {isLoading ? 'Loading...' : confirmText}
+          {isLoading ? 'Loading\u2026' : confirmText}
         </button>
       </div>
     </Modal>

@@ -92,7 +92,7 @@ describe('truncate', () => {
   });
 
   it('should truncate with ellipsis when over limit', () => {
-    expect(truncate('hello world this is long', 10)).toBe('hello w...');
+    expect(truncate('hello world this is long', 10)).toBe('hello wor\u2026');
   });
 
   it('should handle exact length', () => {

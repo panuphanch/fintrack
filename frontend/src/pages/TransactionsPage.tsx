@@ -69,8 +69,10 @@ export default function TransactionsPage() {
             </label>
             <input
               id="search"
+              name="search"
               type="text"
               placeholder="Search merchant..."
+              autoComplete="off"
               value={filters.search || ''}
               onChange={(e) => setFilters({ ...filters, search: e.target.value || undefined })}
               className="input-field"
@@ -155,7 +157,7 @@ export default function TransactionsPage() {
 
       {/* Transactions List */}
       {transactions && transactions.length > 0 ? (
-        <div className="card overflow-hidden p-0">
+        <div className="card overflow-x-auto p-0">
           <table className="min-w-full divide-y divide-white/[0.06]">
             <thead className="bg-surface-alt">
               <tr>
@@ -208,7 +210,7 @@ export default function TransactionsPage() {
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-[#6b6560]">
                     {transaction.card?.name || 'Unknown'}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#f0ece4] text-right font-medium">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-[#f0ece4] text-right font-medium tabular-nums">
                     {formatTHB(transaction.amount)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -233,6 +235,7 @@ export default function TransactionsPage() {
       ) : (
         <div className="card text-center py-12">
           <svg
+            aria-hidden="true"
             className="mx-auto h-12 w-12 text-[#6b6560]"
             fill="none"
             viewBox="0 0 24 24"

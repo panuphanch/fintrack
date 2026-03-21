@@ -75,6 +75,7 @@ export default function DashboardPage() {
           <label className="flex items-center gap-2 text-sm text-[#a8a29e] bg-surface border border-white/[0.06] px-3 py-2 rounded-lg">
             <input
               type="checkbox"
+              name="includeInstallments"
               checked={includeInstallments}
               onChange={(e) => setIncludeInstallments(e.target.checked)}
             />
@@ -90,7 +91,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <div className="card">
           <h3 className="text-sm font-medium text-[#a8a29e]">Monthly Installments</h3>
-          <p className="mt-2 text-3xl font-bold font-mono text-gold-400">
+          <p className="mt-2 text-3xl font-bold font-mono tabular-nums text-gold-400">
             {formatTHB(installmentsTotal?.total || 0)}
           </p>
           <Link to="/installments" className="mt-1 text-sm text-gold-400 hover:text-gold-300">
@@ -100,7 +101,7 @@ export default function DashboardPage() {
 
         <div className="card">
           <h3 className="text-sm font-medium text-[#a8a29e]">Monthly Fixed Costs</h3>
-          <p className="mt-2 text-3xl font-bold font-mono text-emerald-400">
+          <p className="mt-2 text-3xl font-bold font-mono tabular-nums text-emerald-400">
             {formatTHB(fixedCostsTotal?.total || 0)}
           </p>
           <Link to="/fixed-costs" className="mt-1 text-sm text-gold-400 hover:text-gold-300">
@@ -110,7 +111,7 @@ export default function DashboardPage() {
 
         <div className="card">
           <h3 className="text-sm font-medium text-[#a8a29e]">Transaction Spending</h3>
-          <p className="mt-2 text-3xl font-bold font-mono text-[#f0ece4]">
+          <p className="mt-2 text-3xl font-bold font-mono tabular-nums text-[#f0ece4]">
             {formatTHB(billingSummary?.totals.transactions || 0)}
           </p>
           <p className="mt-1 text-sm text-[#6b6560]">
@@ -120,7 +121,7 @@ export default function DashboardPage() {
 
         <div className="card bg-gradient-to-br from-gold-400/20 to-gold-600/10 border-gold-400/20">
           <h3 className="text-sm font-medium text-gold-300">Total Monthly Expenses</h3>
-          <p className="mt-2 text-3xl font-bold font-mono text-gold-400">
+          <p className="mt-2 text-3xl font-bold font-mono tabular-nums text-gold-400">
             {formatTHB(billingSummary?.totals.grandTotal || 0)}
           </p>
           <p className="mt-1 text-sm text-[#a8a29e]">
@@ -190,7 +191,7 @@ export default function DashboardPage() {
                       {transaction.category?.label || 'Unknown'} • {formatDate(transaction.date)}
                     </p>
                   </div>
-                  <p className="font-medium font-mono text-[#f0ece4]">{formatTHB(transaction.amount)}</p>
+                  <p className="font-medium font-mono tabular-nums text-[#f0ece4]">{formatTHB(transaction.amount)}</p>
                 </div>
               ))}
             </div>
@@ -209,7 +210,7 @@ export default function DashboardPage() {
       <div className="card">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-display font-bold text-[#f0ece4]">
-            Cards - {billingSummary?.paymentMonthDisplay || 'Loading...'}
+            Cards - {billingSummary?.paymentMonthDisplay || 'Loading…'}
             {includeInstallments && <span className="text-sm font-normal text-[#6b6560] ml-2">(incl. installments)</span>}
           </h3>
           <Link to="/cards/new" className="text-sm text-gold-400 hover:text-gold-300">
@@ -252,30 +253,30 @@ export default function DashboardPage() {
                   <div className="space-y-1 mb-3">
                     <div className="flex justify-between text-sm">
                       <span className="text-[#6b6560]">Transactions</span>
-                      <span className="text-[#a8a29e] font-mono">{formatTHB(card.transactionAmount)}</span>
+                      <span className="text-[#a8a29e] font-mono tabular-nums">{formatTHB(card.transactionAmount)}</span>
                     </div>
                     {includeInstallments && card.installmentAmount > 0 && (
                       <div className="flex justify-between text-sm">
                         <span className="text-[#6b6560]">Installments</span>
-                        <span className="text-[#a8a29e] font-mono">{formatTHB(card.installmentAmount)}</span>
+                        <span className="text-[#a8a29e] font-mono tabular-nums">{formatTHB(card.installmentAmount)}</span>
                       </div>
                     )}
                     <div className="flex justify-between text-sm font-medium border-t border-white/[0.06] pt-1">
                       <span className="text-[#a8a29e]">Total</span>
-                      <span className="text-[#f0ece4] font-mono">{formatTHB(totalCardSpending)}</span>
+                      <span className="text-[#f0ece4] font-mono tabular-nums">{formatTHB(totalCardSpending)}</span>
                     </div>
                   </div>
 
                   <button
                     onClick={() => handleMarkPaid(card.cardId)}
                     disabled={card.isPaid || markCardPaid.isPending}
-                    className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-all ${
+                    className={`w-full py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
                       card.isPaid
                         ? 'bg-emerald-500/20 text-emerald-400 cursor-default'
                         : 'btn-primary'
                     }`}
                   >
-                    {card.isPaid ? '✓ Paid' : markCardPaid.isPending ? 'Marking...' : 'Pay'}
+                    {card.isPaid ? '✓ Paid' : markCardPaid.isPending ? 'Marking…' : 'Pay'}
                   </button>
                 </div>
               );

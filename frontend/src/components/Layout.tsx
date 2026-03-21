@@ -31,6 +31,10 @@ export default function Layout() {
 
   return (
     <div className="min-h-screen bg-dark">
+      {/* Skip link */}
+      <a href="#main" className="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:px-4 focus:py-2 focus:bg-gold-400 focus:text-dark focus:rounded-lg focus:font-semibold">
+        Skip to main content
+      </a>
       {/* Desktop sidebar */}
       <aside className="hidden lg:fixed lg:inset-y-0 lg:left-0 lg:z-50 lg:flex lg:w-64 lg:flex-col">
         <div className="flex h-full flex-col bg-surface border-r border-white/[0.06]">
@@ -48,13 +52,13 @@ export default function Layout() {
                   <li key={item.name}>
                     <Link
                       to={item.href}
-                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200 ${
+                      className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-200 ${
                         active
                           ? 'bg-gold-400/10 text-gold-400 border-l-2 border-gold-400 -ml-[2px]'
                           : 'text-[#a8a29e] hover:bg-surface-alt hover:text-[#f0ece4]'
                       }`}
                     >
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-5 w-5" aria-hidden="true" />
                       {item.name}
                     </Link>
                   </li>
@@ -96,7 +100,7 @@ export default function Layout() {
           </div>
         </header>
 
-        <main className="p-4 lg:p-8 pb-24 lg:pb-8">
+        <main id="main" className="p-4 lg:p-8 pb-24 lg:pb-8">
           <Outlet />
         </main>
       </div>
@@ -111,13 +115,13 @@ export default function Layout() {
               <Link
                 key={item.name}
                 to={item.href}
-                className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all duration-200 min-w-[60px] ${
+                className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-colors duration-200 min-w-[60px] ${
                   active
                     ? 'text-gold-400'
                     : 'text-[#6b6560] active:text-[#a8a29e]'
                 }`}
               >
-                <item.icon className="h-5 w-5" />
+                <item.icon className="h-5 w-5" aria-hidden="true" />
                 <span className="text-[10px] font-medium">{item.name}</span>
               </Link>
             );
@@ -125,13 +129,15 @@ export default function Layout() {
           {/* More button */}
           <button
             onClick={() => setMoreOpen(!moreOpen)}
-            className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-all duration-200 min-w-[60px] ${
+            aria-label="More menu"
+            aria-expanded={moreOpen}
+            className={`flex flex-col items-center gap-1 px-3 py-1.5 rounded-lg transition-colors duration-200 min-w-[60px] ${
               moreIsActive || moreOpen
                 ? 'text-gold-400'
                 : 'text-[#6b6560] active:text-[#a8a29e]'
             }`}
           >
-            <MoreIcon className="h-5 w-5" />
+            <MoreIcon className="h-5 w-5" aria-hidden="true" />
             <span className="text-[10px] font-medium">More</span>
           </button>
         </div>
@@ -147,6 +153,10 @@ export default function Layout() {
               exit={{ opacity: 0 }}
               className="fixed inset-0 z-[55] bg-black/40 backdrop-blur-sm lg:hidden"
               onClick={() => setMoreOpen(false)}
+              onKeyDown={(e) => { if (e.key === 'Escape') setMoreOpen(false); }}
+              role="button"
+              tabIndex={-1}
+              aria-label="Close menu"
             />
             <motion.div
               initial={{ y: '100%' }}
@@ -154,10 +164,10 @@ export default function Layout() {
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 25, stiffness: 300 }}
               className="fixed bottom-0 inset-x-0 z-[60] lg:hidden bg-surface-elevated border-t border-white/10 rounded-t-2xl"
-              style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+              style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)', overscrollBehavior: 'contain' }}
             >
               {/* Handle */}
-              <div className="flex justify-center pt-3 pb-2">
+              <div className="flex justify-center pt-3 pb-2" aria-hidden="true">
                 <div className="w-10 h-1 bg-white/20 rounded-full" />
               </div>
               <div className="px-4 pb-4 space-y-1">
@@ -168,13 +178,13 @@ export default function Layout() {
                       key={item.name}
                       to={item.href}
                       onClick={() => setMoreOpen(false)}
-                      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-all ${
+                      className={`flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium transition-colors ${
                         active
                           ? 'bg-gold-400/10 text-gold-400'
                           : 'text-[#a8a29e] active:bg-surface-alt'
                       }`}
                     >
-                      <item.icon className="h-5 w-5" />
+                      <item.icon className="h-5 w-5" aria-hidden="true" />
                       {item.name}
                     </Link>
                   );
@@ -186,7 +196,7 @@ export default function Layout() {
                   }}
                   className="flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium text-red-400 active:bg-surface-alt w-full"
                 >
-                  <LogoutIcon className="h-5 w-5" />
+                  <LogoutIcon className="h-5 w-5" aria-hidden="true" />
                   Sign out
                 </button>
               </div>
