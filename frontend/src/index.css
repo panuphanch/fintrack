@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base styles */
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+    @apply bg-dark text-[#f0ece4] antialiased;
+  }
+
+  /* Dark scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-dark;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-surface-alt rounded-full;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-surface-elevated;
+  }
+
+  /* Global checkbox styling (Phase 2 fix: h-4 → h-5) */
+  input[type='checkbox'] {
+    @apply h-5 w-5 rounded bg-surface-alt border-white/20 text-gold-400 focus:ring-gold-400/50 focus:ring-offset-0;
+    accent-color: #d4a853;
+  }
+}
+
+/* Component styles */
+@layer components {
+  .btn-primary {
+    @apply px-4 py-2.5 bg-gold-400 text-dark font-semibold rounded-lg
+           hover:bg-gold-300 active:bg-gold-500 transition-all duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed
+           shadow-glow-sm hover:shadow-glow;
+  }
+
+  .btn-secondary {
+    @apply px-4 py-2.5 bg-surface-alt text-[#a8a29e] font-medium rounded-lg
+           border border-white/10 hover:bg-surface-elevated hover:text-[#f0ece4]
+           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-danger {
+    @apply px-4 py-2.5 bg-red-500/20 text-red-400 font-medium rounded-lg
+           border border-red-500/20 hover:bg-red-500/30 hover:border-red-500/40
+           transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .input-field {
+    @apply w-full px-3 py-2.5 bg-surface-alt border border-white/10 rounded-lg
+           text-[#f0ece4] placeholder-[#6b6560]
+           focus:outline-none focus:ring-2 focus:ring-gold-400/50 focus:border-gold-400/30
+           transition-all duration-200;
+  }
+
+  .input-error {
+    @apply border-red-500/50 focus:ring-red-500/50;
+  }
+
+  .label {
+    @apply block text-sm font-medium text-[#a8a29e] mb-1;
+  }
+
+  .card {
+    @apply bg-surface rounded-xl border border-white/[0.06] p-6
+           shadow-lg shadow-black/20;
+  }
+
+  .error-text {
+    @apply text-sm text-red-400 mt-1;
+  }
+
+  /* Phase 2 fix: select dropdown height alignment */
+  select.input-field {
+    @apply h-[42px];
+  }
+}
