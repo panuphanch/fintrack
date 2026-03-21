@@ -105,6 +105,55 @@ describe('AnalyticsService', () => {
     });
   });
 
+  describe('getMonthlyTrend', () => {
+    it('should return monthly trend data', async () => {
+      (mockPrisma.installment.findMany as any).mockResolvedValue([
+        { monthlyAmount: new Prisma.Decimal(2000) },
+      ]);
+      (mockPrisma.fixedCost.findMany as any).mockResolvedValue([
+        { amount: new Prisma.Decimal(5000) },
+      ]);
+      (mockPrisma.transaction.aggregate as any).mockResolvedValue({
+        _sum: { amount: new Prisma.Decimal(3000) },
+      });
+
+      const result = await service.getMonthlyTrend(householdId, 3);
+
+      expect(result).toHaveLength(3);
+      expect(result[0].transactions).toBe(3000);
+      expect(result[0].installments).toBe(2000);
+      expect(result[0].fixedCosts).toBe(5000);
+      expect(result[0].total).toBe(10000);
+      expect(result[0].month).toMatch(/^\d{4}-\d{2}$/);
+    });
+
+    it('should handle no transactions', async () => {
+      (mockPrisma.installment.findMany as any).mockResolvedValue([]);
+      (mockPrisma.fixedCost.findMany as any).mockResolvedValue([]);
+      (mockPrisma.transaction.aggregate as any).mockResolvedValue({
+        _sum: { amount: null },
+      });
+
+      const result = await service.getMonthlyTrend(householdId, 2);
+
+      expect(result).toHaveLength(2);
+      expect(result[0].transactions).toBe(0);
+      expect(result[0].total).toBe(0);
+    });
+
+    it('should default to 6 months', async () => {
+      (mockPrisma.installment.findMany as any).mockResolvedValue([]);
+      (mockPrisma.fixedCost.findMany as any).mockResolvedValue([]);
+      (mockPrisma.transaction.aggregate as any).mockResolvedValue({
+        _sum: { amount: null },
+      });
+
+      const result = await service.getMonthlyTrend(householdId);
+
+      expect(result).toHaveLength(6);
+    });
+  });
+
   describe('getBillingCycleSummary', () => {
     const mockCard = {
       id: 'card-1',
@@ -165,6 +214,48 @@ describe('AnalyticsService', () => {
 
       expect(result.cards).toEqual([]);
       expect(result.totals.grandTotal).toBe(0);
+    });
+
+    it('should handle installment without cardId', async () => {
+      (mockPrisma.creditCard.findMany as any).mockResolvedValue([mockCard]);
+      (mockPrisma.installment.findMany as any).mockResolvedValue([
+        { monthlyAmount: new Prisma.Decimal(1000), cardId: null, categoryId: 'cat-3' },
+      ]);
+      (mockPrisma.fixedCost.findMany as any).mockResolvedValue([]);
+      (mockPrisma.category.findUnique as any).mockResolvedValue({
+        id: 'cat-3', name: 'OTHER', label: 'Other', color: '#999',
+      });
+      (mockPrisma.transaction.findMany as any).mockResolvedValue([]);
+      (mockPrisma.statement.findUnique as any).mockResolvedValue(null);
+
+      const result = await service.getBillingCycleSummary(householdId, '2026-04');
+
+      expect(result.totals.installments).toBe(1000);
+      expect(result.cards[0].installmentAmount).toBe(0); // not assigned to this card
+    });
+
+    it('should merge category spending from transactions and installments', async () => {
+      (mockPrisma.creditCard.findMany as any).mockResolvedValue([mockCard]);
+      (mockPrisma.installment.findMany as any).mockResolvedValue([
+        { monthlyAmount: new Prisma.Decimal(500), cardId: 'card-1', categoryId: 'cat-2' },
+      ]);
+      (mockPrisma.fixedCost.findMany as any).mockResolvedValue([]);
+      (mockPrisma.category.findUnique as any).mockResolvedValue({
+        id: 'cat-2', name: 'TRAVEL', label: 'Travel', color: '#3b82f6',
+      });
+      (mockPrisma.transaction.findMany as any).mockResolvedValue([
+        {
+          id: 't1', amount: new Prisma.Decimal(300), categoryId: 'cat-2',
+          category: { name: 'TRAVEL', label: 'Travel', color: '#3b82f6' },
+        },
+      ]);
+      (mockPrisma.statement.findUnique as any).mockResolvedValue(null);
+
+      const result = await service.getBillingCycleSummary(householdId, '2026-04');
+
+      // cat-2 should have both transaction (300) and installment (500) = 800
+      const travelCat = result.byCategory.find(c => c.categoryName === 'TRAVEL');
+      expect(travelCat!.amount).toBe(800);
     });
 
     it('should mark card as paid when statement exists', async () => {

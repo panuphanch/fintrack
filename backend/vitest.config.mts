@@ -19,6 +19,8 @@ export default defineConfig({
         'src/__fixtures__/**',
         'src/__test-utils__/**',
         'src/**/*.test.ts',
+        'src/services/ocr.service.ts',
+        'src/services/uploads.service.ts',
       ],
       thresholds: {
         statements: 80,

@@ -108,3 +108,7 @@ export const paymentMonthQuerySchema = z.object({
 export const markCardPaidSchema = z.object({
   paymentMonth: z.string().regex(/^\d{4}-\d{2}$/, 'Payment month must be in YYYY-MM format'),
 });
+
+export const trendQuerySchema = z.object({
+  months: z.coerce.number().int().min(2).max(12).default(6),
+});

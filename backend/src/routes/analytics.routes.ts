@@ -1,6 +1,6 @@
 import { FastifyInstance, FastifyRequest } from 'fastify';
 import { createAnalyticsService } from '../services/analytics.service';
-import { monthQuerySchema, paymentMonthQuerySchema } from '../types/schemas';
+import { monthQuerySchema, paymentMonthQuerySchema, trendQuerySchema } from '../types/schemas';
 
 interface MonthQuery {
   month: string;
@@ -82,6 +82,31 @@ export async function analyticsRoutes(fastify: FastifyInstance) {
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to get card data';
+        fastify.log.error(error);
+        return reply.status(400).send({
+          success: false,
+          error: message,
+        });
+      }
+    }
+  );
+
+  // Get monthly trend for dashboard chart
+  fastify.get<{ Querystring: { months?: string } }>(
+    '/monthly-trend',
+    async (request: FastifyRequest<{ Querystring: { months?: string } }>, reply) => {
+      try {
+        const validated = trendQuerySchema.parse(request.query);
+        const data = await analyticsService.getMonthlyTrend(
+          request.jwtPayload.householdId,
+          validated.months
+        );
+        return reply.send({
+          success: true,
+          data,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to get trend data';
         fastify.log.error(error);
         return reply.status(400).send({
           success: false,

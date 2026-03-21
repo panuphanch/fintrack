@@ -253,6 +253,9 @@ export const analyticsApi = {
 
   billingCycleSummary: (paymentMonth: string) =>
     fetchApi<import('../types').BillingCycleSummary>(`/analytics/billing-cycle-summary?paymentMonth=${paymentMonth}`),
+
+  monthlyTrend: (months: number = 6) =>
+    fetchApi<import('../types').MonthlyTrend[]>(`/analytics/monthly-trend?months=${months}`),
 };
 
 // Uploads API

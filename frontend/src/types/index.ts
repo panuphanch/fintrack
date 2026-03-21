@@ -8,6 +8,8 @@ export interface Category {
   icon: string | null;
   sortOrder: number;
   isSystem: boolean;
+  parentId: string | null;
+  children?: Category[];
   createdAt: string;
   updatedAt: string;
 }
@@ -18,6 +20,7 @@ export interface CreateCategoryInput {
   color: string;
   icon?: string;
   sortOrder?: number;
+  parentId?: string;
 }
 
 export interface UpdateCategoryInput {
@@ -26,6 +29,7 @@ export interface UpdateCategoryInput {
   color?: string;
   icon?: string | null;
   sortOrder?: number;
+  parentId?: string | null;
 }
 
 export interface ReorderCategoryInput {
@@ -360,4 +364,15 @@ export interface AcceptInviteInput {
 export interface AuthResponse {
   user: User;
   token: string;
+}
+
+// Dashboard types
+export type ViewMode = 'household' | 'personal';
+
+export interface MonthlyTrend {
+  month: string;
+  transactions: number;
+  installments: number;
+  fixedCosts: number;
+  total: number;
 }

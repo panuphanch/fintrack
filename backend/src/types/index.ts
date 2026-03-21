@@ -8,6 +8,7 @@ export interface Category {
   icon: string | null;
   sortOrder: number;
   isSystem: boolean;
+  parentId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -190,4 +191,13 @@ export interface CardBillingSummary {
 
 export interface MarkCardPaidInput {
   paymentMonth: string;  // "2026-04"
+}
+
+// Monthly trend for dashboard chart
+export interface MonthlyTrend {
+  month: string;
+  transactions: number;
+  installments: number;
+  fixedCosts: number;
+  total: number;
 }

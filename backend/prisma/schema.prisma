@@ -216,6 +216,9 @@ model Category {
   icon        String?   // e.g., "home", "heart" (icon name)
   sortOrder   Int       @default(0)
   isSystem    Boolean   @default(false) // Prevent deletion of default categories
+  parentId    String?   // Parent category for sub-category grouping
+  parent      Category? @relation("SubCategories", fields: [parentId], references: [id])
+  children    Category[] @relation("SubCategories")
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
 
@@ -227,4 +230,5 @@ model Category {
 
   @@unique([householdId, name])
   @@index([householdId])
+  @@index([parentId])
 }

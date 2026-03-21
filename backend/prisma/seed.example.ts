@@ -43,6 +43,21 @@ async function main() {
     categoryMap.set(category.name, category.id);
   }
 
+  // Set sub-category relationships
+  const SUB_CATEGORY_MAP: Record<string, string> = {
+    CAR_MAINTENANCE: 'CAR',
+  };
+  for (const [childName, parentName] of Object.entries(SUB_CATEGORY_MAP)) {
+    const childId = categoryMap.get(childName);
+    const parentId = categoryMap.get(parentName);
+    if (childId && parentId) {
+      await prisma.category.update({
+        where: { id: childId },
+        data: { parentId },
+      });
+    }
+  }
+
   console.log(`Created ${DEFAULT_CATEGORIES.length} categories`);
 
   const getCategoryId = (name: string): string => {

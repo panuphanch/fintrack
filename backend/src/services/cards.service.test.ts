@@ -91,6 +91,30 @@ describe('CardsService', () => {
       expect(result.name).toBe('Updated Card');
     });
 
+    it('should handle ownerId disconnect (set to null)', async () => {
+      (mockPrisma.creditCard.findFirst as any).mockResolvedValue(mockCard);
+      (mockPrisma.creditCard.update as any).mockResolvedValue({ ...mockCard, ownerId: null, owner: null });
+
+      await service.update('card-1', { ownerId: '' }, householdId);
+
+      expect(mockPrisma.creditCard.update).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            owner: { disconnect: true },
+          }),
+        })
+      );
+    });
+
+    it('should handle creditLimit update', async () => {
+      (mockPrisma.creditCard.findFirst as any).mockResolvedValue(mockCard);
+      (mockPrisma.creditCard.update as any).mockResolvedValue({ ...mockCard, creditLimit: new Prisma.Decimal(100000) });
+
+      const result = await service.update('card-1', { creditLimit: 100000, cutoffDay: 10, dueDay: 20, isActive: false }, householdId);
+
+      expect(result.creditLimit).toBe(100000);
+    });
+
     it('should throw if card not found', async () => {
       (mockPrisma.creditCard.findFirst as any).mockResolvedValue(null);
 

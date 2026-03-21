@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { analyticsApi } from '../lib/api';
-import type { MonthlySummary, CategorySummary, CardSummary, BillingCycleSummary } from '../types';
+import type { MonthlySummary, CategorySummary, CardSummary, BillingCycleSummary, MonthlyTrend } from '../types';
 import { getCurrentMonth, getDefaultPaymentMonth } from '../lib/format';
 
 export function useMonthlySummary(month?: string) {
@@ -36,5 +36,13 @@ export function useBillingCycleSummary(paymentMonth?: string) {
   return useQuery<BillingCycleSummary>({
     queryKey: ['analytics', 'billing-cycle-summary', targetMonth],
     queryFn: () => analyticsApi.billingCycleSummary(targetMonth),
+  });
+}
+
+export function useMonthlyTrend(months: number = 6) {
+  return useQuery<MonthlyTrend[]>({
+    queryKey: ['analytics', 'monthly-trend', months],
+    queryFn: () => analyticsApi.monthlyTrend(months),
+    staleTime: 60_000,
   });
 }

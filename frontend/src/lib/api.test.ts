@@ -9,7 +9,7 @@ beforeEach(() => {
 });
 
 // We need to import after mocking fetch
-const { authApi, cardsApi } = await import('./api');
+const { authApi, cardsApi, analyticsApi } = await import('./api');
 
 describe('fetchApi (via public API methods)', () => {
   it('should add auth header when token exists', async () => {
@@ -91,5 +91,21 @@ describe('fetchApi (via public API methods)', () => {
     });
 
     await expect(cardsApi.list()).rejects.toThrow('An error occurred');
+  });
+});
+
+describe('analyticsApi', () => {
+  it('should call monthly trend endpoint', async () => {
+    mockFetch.mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ success: true, data: [] }),
+    });
+
+    await analyticsApi.monthlyTrend(6);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      '/api/analytics/monthly-trend?months=6',
+      expect.any(Object)
+    );
   });
 });

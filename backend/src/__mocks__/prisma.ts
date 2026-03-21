@@ -87,6 +87,7 @@ export const mockPrisma = {
     update: vi.fn(),
     delete: vi.fn(),
     count: vi.fn(),
+    aggregate: vi.fn(),
   },
   fixedCost: {
     create: vi.fn(),
@@ -96,6 +97,7 @@ export const mockPrisma = {
     update: vi.fn(),
     delete: vi.fn(),
     count: vi.fn(),
+    aggregate: vi.fn(),
   },
   category: {
     create: vi.fn(),

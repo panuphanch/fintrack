@@ -1,5 +1,5 @@
 import { renderHook, waitFor } from '@testing-library/react';
-import { useMonthlySummary, useCategoryAnalytics, useCardAnalytics, useBillingCycleSummary } from './useAnalytics';
+import { useMonthlySummary, useCategoryAnalytics, useCardAnalytics, useBillingCycleSummary, useMonthlyTrend } from './useAnalytics';
 import { analyticsApi } from '../lib/api';
 import { createWrapper } from '../__tests__/test-utils';
 
@@ -9,6 +9,7 @@ vi.mock('../lib/api', () => ({
     byCategory: vi.fn(),
     byCard: vi.fn(),
     billingCycleSummary: vi.fn(),
+    monthlyTrend: vi.fn(),
   },
 }));
 
@@ -90,6 +91,32 @@ describe('useBillingCycleSummary', () => {
 
     await waitFor(() => {
       expect(analyticsApi.billingCycleSummary).toHaveBeenCalledWith('2026-04');
+    });
+  });
+});
+
+describe('useMonthlyTrend', () => {
+  it('should fetch monthly trend data', async () => {
+    const mockData = [
+      { month: '2026-01', transactions: 5000, installments: 2000, fixedCosts: 3000, total: 10000 },
+    ];
+    (analyticsApi.monthlyTrend as any).mockResolvedValue(mockData);
+
+    const { result } = renderHook(() => useMonthlyTrend(6), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual(mockData);
+    });
+    expect(analyticsApi.monthlyTrend).toHaveBeenCalledWith(6);
+  });
+
+  it('should default to 6 months', async () => {
+    (analyticsApi.monthlyTrend as any).mockResolvedValue([]);
+
+    renderHook(() => useMonthlyTrend(), { wrapper: createWrapper() });
+
+    await waitFor(() => {
+      expect(analyticsApi.monthlyTrend).toHaveBeenCalledWith(6);
     });
   });
 });

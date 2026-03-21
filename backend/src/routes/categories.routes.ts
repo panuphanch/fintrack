@@ -13,6 +13,7 @@ const createCategorySchema = z.object({
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid color format'),
   icon: z.string().max(50).optional(),
   sortOrder: z.number().int().min(0).optional(),
+  parentId: z.string().optional(),
 });
 
 const updateCategorySchema = z.object({
@@ -21,6 +22,7 @@ const updateCategorySchema = z.object({
   color: z.string().regex(/^#[0-9a-fA-F]{6}$/, 'Invalid color format').optional(),
   icon: z.string().max(50).optional().nullable(),
   sortOrder: z.number().int().min(0).optional(),
+  parentId: z.string().optional().nullable(),
 });
 
 const reorderCategoriesSchema = z.array(

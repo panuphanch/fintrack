@@ -6,6 +6,7 @@ export interface CreateCategoryInput {
   color: string;
   icon?: string;
   sortOrder?: number;
+  parentId?: string;
 }
 
 export interface UpdateCategoryInput {
@@ -14,6 +15,7 @@ export interface UpdateCategoryInput {
   color?: string;
   icon?: string | null;
   sortOrder?: number;
+  parentId?: string | null;
 }
 
 export interface ReorderCategoryInput {
@@ -95,6 +97,7 @@ export function createCategoriesService(prisma: PrismaClient) {
           icon: input.icon,
           sortOrder,
           isSystem: false,
+          parentId: input.parentId || null,
           householdId,
         },
       });
@@ -129,6 +132,7 @@ export function createCategoriesService(prisma: PrismaClient) {
           color: input.color,
           icon: input.icon,
           sortOrder: input.sortOrder,
+          parentId: input.parentId !== undefined ? input.parentId : undefined,
         },
       });
 
@@ -217,6 +221,26 @@ export function createCategoriesService(prisma: PrismaClient) {
           householdId,
         })),
       });
+
+      // Set sub-category relationships
+      const SUB_CATEGORY_RELATIONS: Record<string, string> = {
+        CAR_MAINTENANCE: 'CAR',
+      };
+
+      for (const [childName, parentName] of Object.entries(SUB_CATEGORY_RELATIONS)) {
+        const child = await prisma.category.findFirst({
+          where: { householdId, name: childName },
+        });
+        const parent = await prisma.category.findFirst({
+          where: { householdId, name: parentName },
+        });
+        if (child && parent) {
+          await prisma.category.update({
+            where: { id: child.id },
+            data: { parentId: parent.id },
+          });
+        }
+      }
     },
 
     async ensureHouseholdHasCategories(householdId: string) {

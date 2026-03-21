@@ -1,8 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { startOfMonth, endOfMonth, parseISO } from 'date-fns';
+import { startOfMonth, endOfMonth, parseISO, subMonths, format } from 'date-fns';
 import { decimalToNumber } from '../utils/decimal';
 import { calculateBillingPeriod, formatPaymentMonthDisplay } from '../utils/billingPeriod';
-import type { MonthlySummary, CategorySummary, CardSummary, BillingCycleSummary, CardBillingSummary } from '../types';
+import type { MonthlySummary, CategorySummary, CardSummary, BillingCycleSummary, CardBillingSummary, MonthlyTrend } from '../types';
 
 export function createAnalyticsService(prisma: PrismaClient) {
   return {
@@ -115,6 +115,58 @@ export function createAnalyticsService(prisma: PrismaClient) {
     async getByCard(householdId: string, month: string): Promise<CardSummary[]> {
       const summary = await this.getMonthlySummary(householdId, month);
       return summary.byCard;
+    },
+
+    async getMonthlyTrend(householdId: string, months: number = 6): Promise<MonthlyTrend[]> {
+      const now = new Date();
+      const results: MonthlyTrend[] = [];
+
+      // Get current installments and fixed costs totals (constant for v1)
+      const installments = await prisma.installment.findMany({
+        where: { householdId, isActive: true },
+      });
+      const installmentsTotal = installments.reduce(
+        (sum, inst) => sum + decimalToNumber(inst.monthlyAmount),
+        0
+      );
+
+      const fixedCosts = await prisma.fixedCost.findMany({
+        where: { householdId, isActive: true },
+      });
+      const fixedCostsTotal = fixedCosts.reduce(
+        (sum, fc) => sum + decimalToNumber(fc.amount),
+        0
+      );
+
+      // Get transaction totals per month
+      for (let i = months - 1; i >= 0; i--) {
+        const monthDate = subMonths(now, i);
+        const start = startOfMonth(monthDate);
+        const end = endOfMonth(monthDate);
+        const monthStr = format(monthDate, 'yyyy-MM');
+
+        const transactionAgg = await prisma.transaction.aggregate({
+          where: {
+            householdId,
+            date: { gte: start, lte: end },
+          },
+          _sum: { amount: true },
+        });
+
+        const transactionsAmount = transactionAgg._sum.amount
+          ? decimalToNumber(transactionAgg._sum.amount)
+          : 0;
+
+        results.push({
+          month: monthStr,
+          transactions: transactionsAmount,
+          installments: installmentsTotal,
+          fixedCosts: fixedCostsTotal,
+          total: transactionsAmount + installmentsTotal + fixedCostsTotal,
+        });
+      }
+
+      return results;
     },
 
     async getBillingCycleSummary(householdId: string, paymentMonth: string): Promise<BillingCycleSummary> {

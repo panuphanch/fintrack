@@ -86,4 +86,26 @@
   select.input-field {
     @apply h-[42px];
   }
+
+  .skeleton {
+    @apply rounded-lg;
+    background: linear-gradient(90deg, #13131f 25%, #1a1a2e 50%, #13131f 75%);
+    background-size: 400% 100%;
+    animation: shimmer 2s infinite linear;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton {
+      animation: none;
+      background: #1a1a2e;
+    }
+  }
+
+  .progress-bar {
+    @apply h-2 rounded-full overflow-hidden bg-surface-alt;
+  }
+
+  .progress-bar-fill {
+    @apply h-full rounded-full transition-all duration-500 ease-out;
+  }
 }
