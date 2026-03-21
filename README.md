@@ -4,13 +4,14 @@ A fullstack web application for tracking personal finances including credit card
 
 ## Features
 
-- **Dashboard** - Overview of monthly expenses with installment toggle
+- **Dashboard** - Personalized greeting, KPI summary cards, budget progress bars, spending-by-category donut chart, 6-month spending trend (stacked bar), upcoming payments, card billing with due-date urgency, and recent transactions
 - **Credit Card Management** - Track multiple cards with billing cycles
 - **Transaction Tracking** - Record individual purchases with categories and tags
 - **Installment Tracking** - Monitor payment plans (e.g., 8/10 payments completed)
 - **Fixed Costs** - Manage recurring monthly expenses (loans, bills, subscriptions)
-- **Budget Management** - Set monthly limits per category
-- **Analytics** - Spending breakdown by category and card
+- **Budget Management** - Set monthly limits per category with spending rollup across sub-categories (transactions + installments + fixed costs)
+- **Category Hierarchy** - Sub-categories roll up into parent budgets (e.g., CAR_MAINTENANCE spending counts toward the CAR budget)
+- **Analytics** - Monthly spending trend, category breakdown, per-card billing cycle summary
 - **Household Support** - Multiple users can share and manage the same data
 - **Receipt Upload** - Attach receipt images to transactions
 
@@ -93,10 +94,15 @@ financial-tracker/
 ├── frontend/                 # React SPA
 │   ├── src/
 │   │   ├── components/       # Reusable UI components
+│   │   │   ├── common/       # Shared components (Modal, Spinner, etc.)
+│   │   │   └── dashboard/    # Dashboard sub-components (9 components)
 │   │   ├── pages/            # Page components
 │   │   ├── hooks/            # TanStack Query hooks
 │   │   ├── lib/              # API client, utilities
 │   │   └── types/            # TypeScript interfaces
+│   ├── design-system/        # Design tokens reference
+│   │   ├── MASTER.md         # Global design system
+│   │   └── pages/            # Page-specific overrides
 │   └── package.json
 ├── backend/                  # Fastify API
 │   ├── src/
@@ -199,6 +205,7 @@ financial-tracker/
 - `GET /api/analytics/by-category` - Spending by category
 - `GET /api/analytics/by-card` - Spending by card
 - `GET /api/analytics/billing-cycle-summary` - Billing cycle summary with installments
+- `GET /api/analytics/monthly-trend` - Monthly spending trend (last N months)
 
 ### Uploads
 - `POST /api/uploads/receipt` - Upload receipt image
@@ -206,22 +213,24 @@ financial-tracker/
 
 ## Categories
 
-Categories are dynamic and managed per household via the Settings page. Default categories seeded:
+Categories are dynamic and managed per household via the Settings page. Categories support a parent/child hierarchy — sub-categories roll up into parent budgets.
 
-| Category | Description |
-|----------|-------------|
-| HOME | Home-related expenses |
-| HEALTH | Medical, fitness, wellness |
-| GADGET | Electronics, devices |
-| CLOTHES | Clothing, accessories |
-| CAR | Vehicle-related |
-| CAR_MAINTENANCE | Vehicle maintenance |
-| BAKERY | Baking supplies |
-| FOOD_DINING | Food and restaurants |
-| ENTERTAINMENT | Entertainment, subscriptions |
-| TRAVEL | Travel expenses |
-| FIXED | Fixed monthly costs |
-| OTHERS | Miscellaneous |
+Default categories seeded:
+
+| Category | Parent | Description |
+|----------|--------|-------------|
+| HOME | — | Home-related expenses |
+| HEALTH | — | Medical, fitness, wellness |
+| GADGET | — | Electronics, devices |
+| CLOTHES | — | Clothing, accessories |
+| CAR | — | Vehicle-related |
+| CAR_MAINTENANCE | CAR | Vehicle maintenance (rolls up into CAR budget) |
+| BAKERY | — | Baking supplies |
+| FOOD_DINING | — | Food and restaurants |
+| ENTERTAINMENT | — | Entertainment, subscriptions |
+| TRAVEL | — | Travel expenses |
+| FIXED | — | Fixed monthly costs |
+| OTHERS | — | Miscellaneous |
 
 ## Environment Variables
 
