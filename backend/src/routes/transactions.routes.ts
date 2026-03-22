@@ -26,13 +26,14 @@ export async function transactionsRoutes(fastify: FastifyInstance) {
           tagIds: validated.tagIds ? validated.tagIds.split(',').filter(Boolean) : undefined,
         };
 
-        const transactions = await transactionsService.list(
+        const result = await transactionsService.list(
           request.jwtPayload.householdId,
           filters
         );
         return reply.send({
           success: true,
-          data: transactions,
+          data: result.data,
+          pagination: result.pagination,
         });
       } catch (error) {
         const message = error instanceof Error ? error.message : 'Failed to list transactions';

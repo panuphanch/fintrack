@@ -34,16 +34,24 @@ describe('TransactionsService', () => {
   describe('list', () => {
     it('should return transactions with decimal conversion and flattened tags', async () => {
       (mockPrisma.transaction.findMany as any).mockResolvedValue([mockTransaction]);
+      (mockPrisma.transaction.count as any).mockResolvedValue(1);
 
       const result = await service.list(householdId);
 
-      expect(result).toHaveLength(1);
-      expect(result[0].amount).toBe(500);
-      expect(result[0].tags).toEqual([{ id: 'tag-1', name: 'Lunch' }]);
+      expect(result.data).toHaveLength(1);
+      expect(result.data[0].amount).toBe(500);
+      expect(result.data[0].tags).toEqual([{ id: 'tag-1', name: 'Lunch' }]);
+      expect(result.pagination).toEqual({
+        total: 1,
+        limit: 20,
+        offset: 0,
+        hasMore: false,
+      });
     });
 
     it('should apply card filter', async () => {
       (mockPrisma.transaction.findMany as any).mockResolvedValue([]);
+      (mockPrisma.transaction.count as any).mockResolvedValue(0);
 
       await service.list(householdId, { cardId: 'card-1' });
 
@@ -56,6 +64,7 @@ describe('TransactionsService', () => {
 
     it('should apply date range filter', async () => {
       (mockPrisma.transaction.findMany as any).mockResolvedValue([]);
+      (mockPrisma.transaction.count as any).mockResolvedValue(0);
 
       await service.list(householdId, {
         startDate: '2025-03-01',
@@ -76,6 +85,7 @@ describe('TransactionsService', () => {
 
     it('should apply search filter', async () => {
       (mockPrisma.transaction.findMany as any).mockResolvedValue([]);
+      (mockPrisma.transaction.count as any).mockResolvedValue(0);
 
       await service.list(householdId, { search: 'Rest' });
 
@@ -90,6 +100,7 @@ describe('TransactionsService', () => {
 
     it('should apply tag filter', async () => {
       (mockPrisma.transaction.findMany as any).mockResolvedValue([]);
+      (mockPrisma.transaction.count as any).mockResolvedValue(0);
 
       await service.list(householdId, { tagIds: ['tag-1', 'tag-2'] });
 

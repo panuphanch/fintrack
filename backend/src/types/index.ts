@@ -111,6 +111,8 @@ export interface TransactionFilters {
   endDate?: string;
   tagIds?: string[];
   search?: string;
+  limit?: number;
+  offset?: number;
 }
 
 // Tag types

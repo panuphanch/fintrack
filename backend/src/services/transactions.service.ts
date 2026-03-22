@@ -42,40 +42,58 @@ export function createTransactionsService(prisma: PrismaClient) {
         };
       }
 
-      const transactions = await prisma.transaction.findMany({
-        where,
-        include: {
-          card: {
-            select: {
-              id: true,
-              name: true,
-              bank: true,
-              lastFour: true,
-              color: true,
-            },
-          },
-          category: true,
-          tags: {
-            include: {
-              tag: true,
-            },
-          },
-          createdBy: {
-            select: {
-              id: true,
-              name: true,
-              email: true,
-            },
+      const limit = filters?.limit ?? 20;
+      const offset = filters?.offset ?? 0;
+
+      const includeOptions = {
+        card: {
+          select: {
+            id: true,
+            name: true,
+            bank: true,
+            lastFour: true,
+            color: true,
           },
         },
-        orderBy: { date: 'desc' },
-      });
+        category: true,
+        tags: {
+          include: {
+            tag: true,
+          },
+        },
+        createdBy: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      };
 
-      return transactions.map((t) => ({
-        ...t,
-        amount: decimalToNumber(t.amount),
-        tags: t.tags.map((tt) => tt.tag),
-      }));
+      const [transactions, total] = await Promise.all([
+        prisma.transaction.findMany({
+          where,
+          include: includeOptions,
+          orderBy: { date: 'desc' },
+          take: limit,
+          skip: offset,
+        }),
+        prisma.transaction.count({ where }),
+      ]);
+
+      return {
+        data: transactions.map((t) => ({
+          ...t,
+          amount: decimalToNumber(t.amount),
+          tags: t.tags.map((tt) => tt.tag),
+        })),
+        pagination: {
+          total,
+          limit,
+          offset,
+          hasMore: offset + limit < total,
+        },
+      };
     },
 
     async getById(id: string, householdId: string) {

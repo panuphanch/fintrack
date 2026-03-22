@@ -49,6 +49,41 @@ async function fetchApi<T>(
   return data.data as T;
 }
 
+async function fetchApiRaw<T>(
+  endpoint: string,
+  options: RequestInit = {}
+): Promise<T> {
+  const token = localStorage.getItem('token');
+
+  const headers: HeadersInit = {
+    ...options.headers,
+  };
+
+  if (options.body) {
+    (headers as Record<string, string>)['Content-Type'] = 'application/json';
+  }
+
+  if (token) {
+    (headers as Record<string, string>)['Authorization'] = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers,
+  });
+
+  const json = await response.json();
+
+  if (!response.ok || !json.success) {
+    if (response.status === 401) {
+      localStorage.removeItem('token');
+    }
+    throw new ApiError(response.status, json.error || 'An error occurred');
+  }
+
+  return json as T;
+}
+
 // Auth API
 export const authApi = {
   login: (email: string, password: string) =>
@@ -167,6 +202,25 @@ export const transactionsApi = {
 
     const query = params.toString();
     return fetchApi<import('../types').Transaction[]>(`/transactions${query ? `?${query}` : ''}`);
+  },
+
+  listPaginated: (filters?: import('../types').TransactionFilters, limit = 20, offset = 0) => {
+    const params = new URLSearchParams();
+    if (filters?.cardId) params.append('cardId', filters.cardId);
+    if (filters?.categoryId) params.append('categoryId', filters.categoryId);
+    if (filters?.startDate) params.append('startDate', filters.startDate);
+    if (filters?.endDate) params.append('endDate', filters.endDate);
+    if (filters?.tagIds?.length) params.append('tagIds', filters.tagIds.join(','));
+    if (filters?.search) params.append('search', filters.search);
+    params.append('limit', String(limit));
+    params.append('offset', String(offset));
+
+    const query = params.toString();
+    return fetchApiRaw<{
+      success: boolean;
+      data: import('../types').Transaction[];
+      pagination: import('../types').PaginatedResponse<import('../types').Transaction>['pagination'];
+    }>(`/transactions?${query}`);
   },
 
   get: (id: string) => fetchApi<import('../types').Transaction>(`/transactions/${id}`),

@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, useInfiniteQuery } from '@tanstack/react-query';
 import { transactionsApi } from '../lib/api';
 import type { Transaction, CreateTransactionInput, UpdateTransactionInput, TransactionFilters } from '../types';
 
@@ -6,6 +6,21 @@ export function useTransactions(filters?: TransactionFilters) {
   return useQuery<Transaction[]>({
     queryKey: ['transactions', filters],
     queryFn: () => transactionsApi.list(filters),
+  });
+}
+
+export function useInfiniteTransactions(filters?: TransactionFilters, pageSize = 20) {
+  return useInfiniteQuery({
+    queryKey: ['transactions', 'infinite', filters],
+    queryFn: async ({ pageParam = 0 }) => {
+      const result = await transactionsApi.listPaginated(filters, pageSize, pageParam);
+      return { data: result.data, pagination: result.pagination };
+    },
+    initialPageParam: 0,
+    getNextPageParam: (lastPage) =>
+      lastPage.pagination?.hasMore
+        ? lastPage.pagination.offset + lastPage.pagination.limit
+        : undefined,
   });
 }
 
