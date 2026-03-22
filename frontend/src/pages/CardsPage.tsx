@@ -1,19 +1,26 @@
 import { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useCards, useDeleteCard } from '../hooks/useCards';
-import { LoadingSpinner, ErrorMessage, ConfirmDialog } from '../components/common';
-import { formatTHB } from '../lib/format';
+import { ErrorMessage, ConfirmDialog } from '../components/common';
+import { CreditCardVisual, CardStats, CardSkeleton } from '../components/cards';
 import type { CreditCard } from '../types';
 
 export default function CardsPage() {
   const { data: cards, isLoading, error, refetch } = useCards();
   const deleteCard = useDeleteCard();
+  const navigate = useNavigate();
   const [cardToDelete, setCardToDelete] = useState<CreditCard | null>(null);
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center py-12">
-        <LoadingSpinner size="lg" />
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <h1 className="font-display text-2xl font-bold text-[#f0ece4]">Credit Cards</h1>
+          <Link to="/cards/new" className="btn-primary">
+            Add Card
+          </Link>
+        </div>
+        <CardSkeleton count={3} />
       </div>
     );
   }
@@ -30,7 +37,7 @@ export default function CardsPage() {
   const handleDelete = async () => {
     if (!cardToDelete) return;
     const idToDelete = cardToDelete.id;
-    setCardToDelete(null); // Close dialog first
+    setCardToDelete(null);
     try {
       await deleteCard.mutateAsync(idToDelete);
     } catch {
@@ -44,7 +51,7 @@ export default function CardsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-[#f0ece4]">Credit Cards</h1>
+        <h1 className="font-display text-2xl font-bold text-[#f0ece4]">Credit Cards</h1>
         <Link to="/cards/new" className="btn-primary">
           Add Card
         </Link>
@@ -76,117 +83,51 @@ export default function CardsPage() {
         </div>
       ) : (
         <>
-          {/* Active Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {activeCards.map((card) => (
-              <div
-                key={card.id}
-                className="card relative overflow-hidden"
-                style={{ borderTopColor: card.color, borderTopWidth: '4px' }}
-              >
-                <div className="flex items-start justify-between">
-                  <div>
-                    <h3 className="text-lg font-medium text-[#f0ece4]">{card.name}</h3>
-                    <p className="text-sm text-[#6b6560]">
-                      {card.bank} •••• {card.lastFour}
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Link
-                      to={`/cards/${card.id}/edit`}
-                      className="text-[#6b6560] hover:text-[#a8a29e]"
-                      aria-label="Edit card"
-                    >
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                        />
-                      </svg>
-                    </Link>
-                    <button
-                      onClick={() => setCardToDelete(card)}
-                      className="text-[#6b6560] hover:text-red-400"
-                      aria-label="Delete card"
-                    >
-                      <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
-                        />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
+          {/* Stats summary */}
+          <CardStats cards={activeCards} />
 
-                <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
-                  <div>
-                    <p className="text-[#6b6560]">Credit Limit</p>
-                    <p className="font-medium text-[#f0ece4]">{formatTHB(card.creditLimit)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#6b6560]">Due Day</p>
-                    <p className="font-medium text-[#f0ece4]">Day {card.dueDay}</p>
-                  </div>
-                  <div>
-                    <p className="text-[#6b6560]">Cutoff Day</p>
-                    <p className="font-medium text-[#f0ece4]">Day {card.cutoffDay}</p>
-                  </div>
-                  {card.owner && (
-                    <div>
-                      <p className="text-[#6b6560]">Owner</p>
-                      <p className="font-medium text-[#f0ece4]">{card.owner.name}</p>
-                    </div>
-                  )}
-                </div>
-              </div>
+          {/* Active cards grid */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {activeCards.map((card, i) => (
+              <CreditCardVisual
+                key={card.id}
+                card={card}
+                onEdit={(id) => navigate(`/cards/${id}/edit`)}
+                onDelete={(c) => setCardToDelete(c)}
+                style={{ animationDelay: `${i * 0.05}s` }}
+              />
             ))}
           </div>
 
-          {/* Inactive Cards */}
+          {/* Inactive cards */}
           {inactiveCards.length > 0 && (
-            <div>
-              <h2 className="text-lg font-medium text-[#6b6560] mb-4">Inactive Cards</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {inactiveCards.map((card) => (
-                  <div
+            <details open>
+              <summary className="flex items-center gap-2 cursor-pointer text-lg font-medium text-[#6b6560] select-none group list-none [&::-webkit-details-marker]:hidden">
+                <svg
+                  className="h-4 w-4 transition-transform duration-200 group-open:rotate-180"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                  strokeWidth={2}
+                  aria-hidden="true"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                </svg>
+                Inactive Cards ({inactiveCards.length})
+              </summary>
+              <div className="mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {inactiveCards.map((card, i) => (
+                  <CreditCardVisual
                     key={card.id}
-                    className="card opacity-60"
-                    style={{ borderTopColor: card.color, borderTopWidth: '4px' }}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-lg font-medium text-[#f0ece4]">{card.name}</h3>
-                        <p className="text-sm text-[#6b6560]">
-                          {card.bank} •••• {card.lastFour}
-                        </p>
-                        <span className="mt-2 inline-block px-2 py-1 text-xs font-medium text-[#a8a29e] bg-surface-alt rounded">
-                          Inactive
-                        </span>
-                      </div>
-                      <Link
-                        to={`/cards/${card.id}/edit`}
-                        className="text-[#6b6560] hover:text-[#a8a29e]"
-                        aria-label="Edit card"
-                      >
-                        <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
-                          />
-                        </svg>
-                      </Link>
-                    </div>
-                  </div>
+                    card={card}
+                    onEdit={(id) => navigate(`/cards/${id}/edit`)}
+                    onDelete={(c) => setCardToDelete(c)}
+                    isInactive
+                    style={{ animationDelay: `${i * 0.05}s` }}
+                  />
                 ))}
               </div>
-            </div>
+            </details>
           )}
         </>
       )}
@@ -196,7 +137,7 @@ export default function CardsPage() {
         onClose={() => setCardToDelete(null)}
         onConfirm={handleDelete}
         title="Delete Card"
-        message={`Are you sure you want to delete "${cardToDelete?.name}"? This will mark the card as inactive.`}
+        message={`Are you sure you want to delete \u201C${cardToDelete?.name}\u201D? This will mark the card as inactive.`}
         confirmText="Delete"
         isLoading={deleteCard.isPending}
       />
