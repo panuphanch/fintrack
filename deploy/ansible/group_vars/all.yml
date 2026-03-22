@@ -1,0 +1,60 @@
+# =============================================================================
+# Ansible Group Variables - All Hosts
+# =============================================================================
+# Shared Linode VPS with granny-ledger
+# System-level setup (Node.js, PostgreSQL, etc.) already done
+
+# -----------------------------------------------------------------------------
+# Deploy User (already exists on server)
+# -----------------------------------------------------------------------------
+deploy_user: deploy
+deploy_group: deploy
+deploy_home: /home/{{ deploy_user }}
+
+# -----------------------------------------------------------------------------
+# Application Configuration
+# -----------------------------------------------------------------------------
+app:
+  name: financial-tracker
+  dir: /var/www/financial-tracker
+  logs_dir: "{{ deploy_home }}/logs"
+  git_repo: git@github.com:panuphanch/fintrack.git
+  git_branch: main
+
+# Domain (subdomain of grannysaidgo.com)
+app_domain: finance.grannysaidgo.com
+
+# -----------------------------------------------------------------------------
+# PostgreSQL Configuration (server already has PostgreSQL 16)
+# -----------------------------------------------------------------------------
+postgresql:
+  db_name: financial_tracker
+  db_user: fintrack_user
+  db_password: "{{ postgresql_db_password }}"
+
+# -----------------------------------------------------------------------------
+# Backend Configuration
+# -----------------------------------------------------------------------------
+backend_port: 3001
+
+# -----------------------------------------------------------------------------
+# PM2 Configuration
+# -----------------------------------------------------------------------------
+pm2:
+  app_name: fintrack-api
+  max_memory: "200M"
+
+# -----------------------------------------------------------------------------
+# SSL/TLS Configuration
+# -----------------------------------------------------------------------------
+ssl:
+  enabled: true  # Set to true after DNS is configured
+  email: "c.panuphan@gmail.com"       # Required for Let's Encrypt
+
+# -----------------------------------------------------------------------------
+# Backup Configuration
+# -----------------------------------------------------------------------------
+backup:
+  enabled: true
+  retention_days: 7
+  schedule: "0 2 * * *"  # Daily at 2 AM

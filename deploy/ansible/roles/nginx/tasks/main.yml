@@ -1,0 +1,45 @@
+---
+# =============================================================================
+# Nginx Role - Add Financial Tracker Site Configuration
+# =============================================================================
+# Nginx is already installed by granny-ledger's deployment.
+# This role only adds a new site config for the subdomain.
+
+- name: Deploy Nginx site configuration
+  ansible.builtin.template:
+    src: financial-tracker.conf.j2
+    dest: /etc/nginx/sites-available/financial-tracker
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload Nginx
+
+- name: Enable Nginx site
+  ansible.builtin.file:
+    src: /etc/nginx/sites-available/financial-tracker
+    dest: /etc/nginx/sites-enabled/financial-tracker
+    state: link
+  notify: Reload Nginx
+
+- name: Test Nginx configuration
+  ansible.builtin.command: nginx -t
+  changed_when: false
+
+# -----------------------------------------------------------------------------
+# SSL with Certbot (Optional - for subdomain only)
+# -----------------------------------------------------------------------------
+
+- name: Obtain SSL certificate for subdomain
+  ansible.builtin.command: >
+    certbot --nginx
+    -d {{ app_domain }}
+    --non-interactive
+    --agree-tos
+    --email {{ ssl.email }}
+  when:
+    - ssl.enabled | default(false)
+    - app_domain | default('') != ''
+    - ssl.email | default('') != ''
+  register: certbot_result
+  changed_when: "'Certificate not yet due for renewal' not in certbot_result.stdout"
+  failed_when: false

@@ -1,0 +1,83 @@
+---
+# =============================================================================
+# Financial Tracker - Deployment Playbook
+# =============================================================================
+#
+# Deploys to existing Linode VPS (shared with granny-ledger).
+# System-level setup (Node.js, PM2, PostgreSQL, Nginx) already exists.
+#
+# Usage:
+#   # Full deployment
+#   ansible-playbook playbook.yml \
+#     --extra-vars "postgresql_db_password=SECURE_PW jwt_secret=SECURE_SECRET"
+#
+#   # App-only redeploy (after code changes)
+#   ansible-playbook playbook.yml --tags "app,deploy" \
+#     --extra-vars "postgresql_db_password=SECURE_PW jwt_secret=SECURE_SECRET"
+#
+# =============================================================================
+
+- name: Deploy Financial Tracker
+  hosts: all
+  become: yes
+
+  vars_prompt:
+    - name: postgresql_db_password
+      prompt: "Enter PostgreSQL password for fintrack_user"
+      private: yes
+      default: ""
+
+    - name: jwt_secret
+      prompt: "Enter JWT secret for Financial Tracker"
+      private: yes
+      default: ""
+
+  pre_tasks:
+    - name: Validate required variables
+      ansible.builtin.fail:
+        msg: "Both postgresql_db_password and jwt_secret are required. Pass via --extra-vars or prompt."
+      when: postgresql_db_password | length == 0 or jwt_secret | length == 0
+
+    - name: Set PostgreSQL password
+      ansible.builtin.set_fact:
+        postgresql:
+          db_name: "{{ postgresql.db_name | default('financial_tracker') }}"
+          db_user: "{{ postgresql.db_user | default('fintrack_user') }}"
+          db_password: "{{ postgresql_db_password }}"
+
+  roles:
+    - role: database
+      tags: [database, setup]
+
+    - role: nginx
+      tags: [nginx, webserver, setup]
+
+    - role: app
+      tags: [app, deploy]
+
+  post_tasks:
+    - name: Display deployment summary
+      ansible.builtin.debug:
+        msg: |
+          ============================================
+          Financial Tracker Deployment Complete!
+          ============================================
+
+          {% if app_domain | default('') != '' %}
+          URL: https://{{ app_domain }}
+          {% else %}
+          URL: http://{{ ansible_host }}
+          {% endif %}
+
+          SSH: ssh {{ deploy_user }}@{{ ansible_host }}
+
+          Services:
+            - PM2: pm2 status (look for {{ pm2.app_name }})
+            - Nginx: systemctl status nginx
+            - PostgreSQL: systemctl status postgresql
+
+          Logs:
+            - App: pm2 logs {{ pm2.app_name }}
+            - Nginx: /var/log/nginx/
+
+          ============================================

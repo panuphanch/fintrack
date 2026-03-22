@@ -1,0 +1,48 @@
+---
+# =============================================================================
+# Database Role - Create Database and User
+# =============================================================================
+# PostgreSQL 16 is already installed and tuned by granny-ledger's deployment.
+# This role only creates the database and user for financial-tracker.
+
+- name: Create PostgreSQL user
+  become: yes
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: "{{ postgresql.db_user }}"
+    password: "{{ postgresql.db_password }}"
+    role_attr_flags: CREATEDB,LOGIN
+    state: present
+
+- name: Create PostgreSQL database
+  become: yes
+  become_user: postgres
+  community.postgresql.postgresql_db:
+    name: "{{ postgresql.db_name }}"
+    owner: "{{ postgresql.db_user }}"
+    encoding: UTF8
+    lc_collate: en_US.UTF-8
+    lc_ctype: en_US.UTF-8
+    template: template0
+    state: present
+
+- name: Grant all privileges on database
+  become: yes
+  become_user: postgres
+  community.postgresql.postgresql_privs:
+    type: database
+    database: "{{ postgresql.db_name }}"
+    roles: "{{ postgresql.db_user }}"
+    privs: ALL
+    state: present
+
+- name: Grant schema privileges
+  become: yes
+  become_user: postgres
+  community.postgresql.postgresql_privs:
+    type: schema
+    database: "{{ postgresql.db_name }}"
+    objs: public
+    roles: "{{ postgresql.db_user }}"
+    privs: ALL
+    state: present

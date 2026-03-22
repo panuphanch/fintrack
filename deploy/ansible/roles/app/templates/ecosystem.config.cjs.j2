@@ -1,0 +1,45 @@
+/**
+ * PM2 Ecosystem Configuration for Financial Tracker
+ * Managed by Ansible - Do not edit manually
+ */
+
+module.exports = {
+  apps: [
+    {
+      name: '{{ pm2.app_name }}',
+      script: './backend/dist/index.js',
+      cwd: '{{ app.dir }}',
+      instances: 1,
+      exec_mode: 'fork',
+
+      // Memory management (important for shared 1GB VPS)
+      max_memory_restart: '{{ pm2.max_memory }}',
+
+      // Graceful shutdown
+      kill_timeout: 5000,
+      wait_ready: true,
+      listen_timeout: 10000,
+
+      // Logging
+      error_file: '{{ app.logs_dir }}/{{ pm2.app_name }}-error.log',
+      out_file: '{{ app.logs_dir }}/{{ pm2.app_name }}-out.log',
+      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
+      merge_logs: true,
+
+      // Auto-restart
+      autorestart: true,
+      max_restarts: 10,
+      min_uptime: '10s',
+
+      // Watch (disabled in production)
+      watch: false,
+
+      // Environment variables
+      env_production: {
+        NODE_ENV: 'production',
+        PORT: {{ backend_port }},
+        HOST: '127.0.0.1'
+      }
+    }
+  ]
+};
