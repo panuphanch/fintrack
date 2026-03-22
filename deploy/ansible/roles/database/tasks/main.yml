@@ -31,7 +31,7 @@
   become_user: postgres
   community.postgresql.postgresql_privs:
     type: database
-    database: "{{ postgresql.db_name }}"
+    login_db: "{{ postgresql.db_name }}"
     roles: "{{ postgresql.db_user }}"
     privs: ALL
     state: present
@@ -41,7 +41,7 @@
   become_user: postgres
   community.postgresql.postgresql_privs:
     type: schema
-    database: "{{ postgresql.db_name }}"
+    login_db: "{{ postgresql.db_name }}"
     objs: public
     roles: "{{ postgresql.db_user }}"
     privs: ALL

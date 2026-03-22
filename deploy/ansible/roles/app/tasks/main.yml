@@ -7,6 +7,14 @@
 # Clone Repository
 # -----------------------------------------------------------------------------
 
+- name: Create application directory
+  ansible.builtin.file:
+    path: "{{ app.dir }}"
+    state: directory
+    owner: "{{ deploy_user }}"
+    group: "{{ deploy_group }}"
+    mode: "0755"
+
 - name: Clone application repository
   ansible.builtin.git:
     repo: "{{ app.git_repo }}"
