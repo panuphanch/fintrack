@@ -1,5 +1,5 @@
 import { mockPrisma, resetMocks } from '../__mocks__/prisma';
-import { createCategoriesService } from './categories.service';
+import { createCategoriesService, DEFAULT_CATEGORIES } from './categories.service';
 
 const service = createCategoriesService(mockPrisma);
 const householdId = 'household-1';
@@ -10,7 +10,7 @@ const mockCategory = {
   label: 'Food & Dining',
   color: '#ef4444',
   icon: 'fire',
-  sortOrder: 7,
+  sortOrder: 6,
   isSystem: true,
   householdId,
 };
@@ -69,10 +69,10 @@ describe('CategoriesService', () => {
   });
 
   describe('create', () => {
-    it('should create with auto sortOrder', async () => {
+    it('should create with auto sortOrder and no parentId', async () => {
       (mockPrisma.category.findFirst as any).mockResolvedValue(null);
-      (mockPrisma.category.aggregate as any).mockResolvedValue({ _max: { sortOrder: 11 } });
-      const newCat = { ...mockCategory, id: 'cat-new', name: 'PETS', sortOrder: 12, isSystem: false };
+      (mockPrisma.category.aggregate as any).mockResolvedValue({ _max: { sortOrder: 10 } });
+      const newCat = { ...mockCategory, id: 'cat-new', name: 'PETS', sortOrder: 11, isSystem: false };
       (mockPrisma.category.create as any).mockResolvedValue(newCat);
 
       const result = await service.create(
@@ -81,15 +81,13 @@ describe('CategoriesService', () => {
       );
 
       expect(result).toEqual(newCat);
-      expect(mockPrisma.category.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.objectContaining({
-            name: 'PETS',
-            sortOrder: 12,
-            isSystem: false,
-          }),
-        })
-      );
+      const createCall = (mockPrisma.category.create as any).mock.calls[0][0];
+      expect(createCall.data).not.toHaveProperty('parentId');
+      expect(createCall.data).toMatchObject({
+        name: 'PETS',
+        sortOrder: 11,
+        isSystem: false,
+      });
     });
 
     it('should use provided sortOrder', async () => {
@@ -114,7 +112,7 @@ describe('CategoriesService', () => {
   });
 
   describe('update', () => {
-    it('should update a category', async () => {
+    it('should update a category without parentId', async () => {
       (mockPrisma.category.findFirst as any).mockResolvedValue(mockCategory);
       const updated = { ...mockCategory, label: 'Updated' };
       (mockPrisma.category.update as any).mockResolvedValue(updated);
@@ -122,6 +120,8 @@ describe('CategoriesService', () => {
       const result = await service.update('cat-1', { label: 'Updated' }, householdId);
 
       expect(result.label).toBe('Updated');
+      const updateCall = (mockPrisma.category.update as any).mock.calls[0][0];
+      expect(updateCall.data).not.toHaveProperty('parentId');
     });
 
     it('should throw if not found', async () => {
@@ -218,26 +218,49 @@ describe('CategoriesService', () => {
   });
 
   describe('createDefaultCategories', () => {
-    it('should create defaults when no categories exist', async () => {
+    it('should create 11 defaults (no CAR_MAINTENANCE) when no categories exist', async () => {
       (mockPrisma.category.count as any).mockResolvedValue(0);
 
       await service.createDefaultCategories(householdId);
 
-      expect(mockPrisma.category.createMany).toHaveBeenCalledWith(
-        expect.objectContaining({
-          data: expect.arrayContaining([
-            expect.objectContaining({ name: 'HOME', householdId }),
-          ]),
-        })
-      );
+      expect(mockPrisma.category.createMany).toHaveBeenCalledTimes(1);
+      const createManyCall = (mockPrisma.category.createMany as any).mock.calls[0][0];
+      const names = createManyCall.data.map((d: any) => d.name);
+      expect(names).toHaveLength(11);
+      expect(names).not.toContain('CAR_MAINTENANCE');
+      expect(names).toContain('CAR');
+      expect(names).toContain('HOME');
+    });
+
+    it('should not set any parentId relationships', async () => {
+      (mockPrisma.category.count as any).mockResolvedValue(0);
+
+      await service.createDefaultCategories(householdId);
+
+      // No category.findFirst or category.update calls for setting parentId
+      expect(mockPrisma.category.findFirst).not.toHaveBeenCalled();
+      expect(mockPrisma.category.update).not.toHaveBeenCalled();
     });
 
     it('should skip if categories already exist', async () => {
-      (mockPrisma.category.count as any).mockResolvedValue(12);
+      (mockPrisma.category.count as any).mockResolvedValue(11);
 
       await service.createDefaultCategories(householdId);
 
       expect(mockPrisma.category.createMany).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('DEFAULT_CATEGORIES', () => {
+    it('should have 11 categories with contiguous sortOrders', () => {
+      expect(DEFAULT_CATEGORIES).toHaveLength(11);
+      const sortOrders = DEFAULT_CATEGORIES.map((c) => c.sortOrder);
+      expect(sortOrders).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+    });
+
+    it('should not include CAR_MAINTENANCE', () => {
+      const names = DEFAULT_CATEGORIES.map((c) => c.name);
+      expect(names).not.toContain('CAR_MAINTENANCE');
     });
   });
 });

@@ -6,7 +6,7 @@ const icon = <svg data-testid="icon" />;
 
 function renderCard(props = {}) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <SummaryCard
         title="Installments"
         value={15000}

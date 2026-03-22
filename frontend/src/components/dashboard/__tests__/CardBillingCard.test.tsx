@@ -38,7 +38,7 @@ function renderCard(props = {}) {
     isPaying: false,
   };
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <CardBillingCard {...defaultProps} {...props} />
     </MemoryRouter>
   );

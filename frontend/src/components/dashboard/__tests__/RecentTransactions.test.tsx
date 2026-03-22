@@ -5,7 +5,7 @@ import type { Transaction, Category } from '../../../types';
 
 const mockCategory: Category = {
   id: 'cat-1', householdId: 'h1', name: 'FOOD', label: 'Food', color: '#ef4444',
-  icon: null, sortOrder: 0, isSystem: true, parentId: null, createdAt: '', updatedAt: '',
+  icon: null, sortOrder: 0, isSystem: true, createdAt: '', updatedAt: '',
 };
 
 const mockTransaction: Transaction = {
@@ -20,7 +20,7 @@ const mockTransaction: Transaction = {
 
 function renderTransactions(transactions: Transaction[] = []) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <RecentTransactions transactions={transactions} />
     </MemoryRouter>
   );

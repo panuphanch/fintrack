@@ -3,109 +3,107 @@ import { startOfMonth, endOfMonth } from 'date-fns';
 import { decimalToNumber } from '../utils/decimal';
 import type { CreateBudgetInput, UpdateBudgetInput } from '../types';
 
-/**
- * Get all category IDs that should roll up into a budget category.
- * Returns the category itself + all children that have it as parentId.
- */
-async function getCategoryIdsWithChildren(
-  prisma: PrismaClient,
-  categoryId: string,
-  householdId: string
-): Promise<string[]> {
-  const children = await prisma.category.findMany({
-    where: { householdId, parentId: categoryId },
-    select: { id: true },
-  });
-  return [categoryId, ...children.map((c) => c.id)];
-}
-
 export function createBudgetsService(prisma: PrismaClient) {
+  /**
+   * Build spending maps for transactions, installments, and fixed costs
+   * for all categories in a household for the current month.
+   */
+  async function getSpendingMaps(householdId: string) {
+    const now = new Date();
+    const monthStart = startOfMonth(now);
+    const monthEnd = endOfMonth(now);
+
+    const spending = await prisma.transaction.groupBy({
+      by: ['categoryId'],
+      where: {
+        householdId,
+        date: { gte: monthStart, lte: monthEnd },
+      },
+      _sum: { amount: true },
+    });
+
+    const spendingMap = new Map(
+      spending.map((s) => [s.categoryId, decimalToNumber(s._sum.amount)])
+    );
+
+    const installments = await prisma.installment.findMany({
+      where: { householdId, isActive: true },
+    });
+
+    const installmentMap = new Map<string, number>();
+    for (const inst of installments) {
+      const current = installmentMap.get(inst.categoryId) || 0;
+      installmentMap.set(inst.categoryId, current + decimalToNumber(inst.monthlyAmount));
+    }
+
+    const fixedCosts = await prisma.fixedCost.findMany({
+      where: { householdId, isActive: true },
+    });
+
+    const fixedCostMap = new Map<string, number>();
+    for (const fc of fixedCosts) {
+      const current = fixedCostMap.get(fc.categoryId) || 0;
+      fixedCostMap.set(fc.categoryId, current + decimalToNumber(fc.amount));
+    }
+
+    return { spendingMap, installmentMap, fixedCostMap };
+  }
+
+  function getCategorySpent(
+    categoryId: string,
+    maps: { spendingMap: Map<string, number>; installmentMap: Map<string, number>; fixedCostMap: Map<string, number> }
+  ): number {
+    return (maps.spendingMap.get(categoryId) || 0)
+      + (maps.installmentMap.get(categoryId) || 0)
+      + (maps.fixedCostMap.get(categoryId) || 0);
+  }
+
   return {
     async list(householdId: string) {
       const budgets = await prisma.budget.findMany({
         where: { householdId },
         include: {
-          category: {
-            include: { children: { select: { id: true } } },
-          },
+          category: true,
         },
         orderBy: { category: { sortOrder: 'asc' } },
       });
 
-      // Get current month spending for each category
-      const now = new Date();
-      const monthStart = startOfMonth(now);
-      const monthEnd = endOfMonth(now);
+      const maps = await getSpendingMaps(householdId);
 
-      const spending = await prisma.transaction.groupBy({
-        by: ['categoryId'],
-        where: {
-          householdId,
-          date: {
-            gte: monthStart,
-            lte: monthEnd,
-          },
-        },
-        _sum: {
-          amount: true,
-        },
+      return budgets.map((budget) => ({
+        ...budget,
+        category: budget.category,
+        monthlyLimit: decimalToNumber(budget.monthlyLimit),
+        spent: getCategorySpent(budget.categoryId, maps),
+      }));
+    },
+
+    async listWithAllCategories(householdId: string) {
+      const categories = await prisma.category.findMany({
+        where: { householdId },
+        orderBy: { sortOrder: 'asc' },
       });
 
-      const spendingMap = new Map(
-        spending.map((s) => [s.categoryId, decimalToNumber(s._sum.amount)])
-      );
-
-      // Include active installments grouped by category
-      const installments = await prisma.installment.findMany({
-        where: { householdId, isActive: true },
+      const budgets = await prisma.budget.findMany({
+        where: { householdId },
       });
+      const budgetMap = new Map(budgets.map((b) => [b.categoryId, b]));
 
-      const installmentMap = new Map<string, number>();
-      for (const inst of installments) {
-        const current = installmentMap.get(inst.categoryId) || 0;
-        installmentMap.set(inst.categoryId, current + decimalToNumber(inst.monthlyAmount));
-      }
+      const maps = await getSpendingMaps(householdId);
 
-      // Include active fixed costs grouped by category
-      const fixedCosts = await prisma.fixedCost.findMany({
-        where: { householdId, isActive: true },
-      });
-
-      const fixedCostMap = new Map<string, number>();
-      for (const fc of fixedCosts) {
-        const current = fixedCostMap.get(fc.categoryId) || 0;
-        fixedCostMap.set(fc.categoryId, current + decimalToNumber(fc.amount));
-      }
-
-      return budgets.map((budget) => {
-        // Collect IDs: this category + all child categories
-        const categoryIds = [
-          budget.categoryId,
-          ...budget.category.children.map((c) => c.id),
-        ];
-
-        // Sum spending across parent + children (transactions + installments + fixed costs)
-        let totalSpent = 0;
-        for (const catId of categoryIds) {
-          totalSpent += spendingMap.get(catId) || 0;
-          totalSpent += installmentMap.get(catId) || 0;
-          totalSpent += fixedCostMap.get(catId) || 0;
-        }
-
-        // Strip children from response to keep shape consistent
-        const { children: _, ...category } = budget.category;
-
+      return categories.map((cat) => {
+        const budget = budgetMap.get(cat.id);
         return {
-          ...budget,
-          category,
-          monthlyLimit: decimalToNumber(budget.monthlyLimit),
-          spent: totalSpent,
+          category: cat,
+          budget: budget
+            ? { id: budget.id, monthlyLimit: decimalToNumber(budget.monthlyLimit) }
+            : null,
+          spent: getCategorySpent(cat.id, maps),
         };
       });
     },
 
     async create(input: CreateBudgetInput, householdId: string) {
-      // Check for existing budget for this category
       const existing = await prisma.budget.findFirst({
         where: {
           householdId,
@@ -154,10 +152,6 @@ export function createBudgetsService(prisma: PrismaClient) {
         },
       });
 
-      // Get all category IDs (parent + children) for rollup
-      const categoryIds = await getCategoryIdsWithChildren(prisma, budget.categoryId, householdId);
-
-      // Get current spending (transactions + installments) across all related categories
       const now = new Date();
       const monthStart = startOfMonth(now);
       const monthEnd = endOfMonth(now);
@@ -165,37 +159,28 @@ export function createBudgetsService(prisma: PrismaClient) {
       const spending = await prisma.transaction.aggregate({
         where: {
           householdId,
-          categoryId: { in: categoryIds },
-          date: {
-            gte: monthStart,
-            lte: monthEnd,
-          },
+          categoryId: budget.categoryId,
+          date: { gte: monthStart, lte: monthEnd },
         },
-        _sum: {
-          amount: true,
-        },
+        _sum: { amount: true },
       });
 
       const installmentSpending = await prisma.installment.aggregate({
         where: {
           householdId,
-          categoryId: { in: categoryIds },
+          categoryId: budget.categoryId,
           isActive: true,
         },
-        _sum: {
-          monthlyAmount: true,
-        },
+        _sum: { monthlyAmount: true },
       });
 
       const fixedCostSpending = await prisma.fixedCost.aggregate({
         where: {
           householdId,
-          categoryId: { in: categoryIds },
+          categoryId: budget.categoryId,
           isActive: true,
         },
-        _sum: {
-          amount: true,
-        },
+        _sum: { amount: true },
       });
 
       return {

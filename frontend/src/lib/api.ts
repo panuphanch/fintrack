@@ -209,6 +209,8 @@ export const tagsApi = {
 export const budgetsApi = {
   list: () => fetchApi<import('../types').Budget[]>('/budgets'),
 
+  overview: () => fetchApi<import('../types').CategoryBudgetRow[]>('/budgets/overview'),
+
   create: (data: import('../types').CreateBudgetInput) =>
     fetchApi<import('../types').Budget>('/budgets', {
       method: 'POST',

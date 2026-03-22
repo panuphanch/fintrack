@@ -8,7 +8,6 @@ export interface Category {
   icon: string | null;
   sortOrder: number;
   isSystem: boolean;
-  parentId: string | null;
   createdAt: Date;
   updatedAt: Date;
 }

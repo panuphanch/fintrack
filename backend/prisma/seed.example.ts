@@ -10,13 +10,12 @@ const DEFAULT_CATEGORIES = [
   { name: 'GADGET', label: 'Gadget', color: '#8b5cf6', icon: 'device-mobile', sortOrder: 2, isSystem: true },
   { name: 'CLOTHES', label: 'Clothes', color: '#ec4899', icon: 'shopping-bag', sortOrder: 3, isSystem: true },
   { name: 'CAR', label: 'Car', color: '#f97316', icon: 'truck', sortOrder: 4, isSystem: true },
-  { name: 'CAR_MAINTENANCE', label: 'Car Maintenance', color: '#f59e0b', icon: 'wrench', sortOrder: 5, isSystem: true },
-  { name: 'BAKERY', label: 'Bakery', color: '#a855f7', icon: 'cake', sortOrder: 6, isSystem: true },
-  { name: 'FOOD_DINING', label: 'Food & Dining', color: '#ef4444', icon: 'fire', sortOrder: 7, isSystem: true },
-  { name: 'ENTERTAINMENT', label: 'Entertainment', color: '#06b6d4', icon: 'film', sortOrder: 8, isSystem: true },
-  { name: 'TRAVEL', label: 'Travel', color: '#14b8a6', icon: 'globe', sortOrder: 9, isSystem: true },
-  { name: 'FIXED', label: 'Fixed', color: '#6b7280', icon: 'calendar', sortOrder: 10, isSystem: true },
-  { name: 'OTHERS', label: 'Others', color: '#9ca3af', icon: 'dots-horizontal', sortOrder: 11, isSystem: true },
+  { name: 'BAKERY', label: 'Bakery', color: '#a855f7', icon: 'cake', sortOrder: 5, isSystem: true },
+  { name: 'FOOD_DINING', label: 'Food & Dining', color: '#ef4444', icon: 'fire', sortOrder: 6, isSystem: true },
+  { name: 'ENTERTAINMENT', label: 'Entertainment', color: '#06b6d4', icon: 'film', sortOrder: 7, isSystem: true },
+  { name: 'TRAVEL', label: 'Travel', color: '#14b8a6', icon: 'globe', sortOrder: 8, isSystem: true },
+  { name: 'FIXED', label: 'Fixed', color: '#6b7280', icon: 'calendar', sortOrder: 9, isSystem: true },
+  { name: 'OTHERS', label: 'Others', color: '#9ca3af', icon: 'dots-horizontal', sortOrder: 10, isSystem: true },
 ];
 
 async function main() {
@@ -41,21 +40,6 @@ async function main() {
       },
     });
     categoryMap.set(category.name, category.id);
-  }
-
-  // Set sub-category relationships
-  const SUB_CATEGORY_MAP: Record<string, string> = {
-    CAR_MAINTENANCE: 'CAR',
-  };
-  for (const [childName, parentName] of Object.entries(SUB_CATEGORY_MAP)) {
-    const childId = categoryMap.get(childName);
-    const parentId = categoryMap.get(parentName);
-    if (childId && parentId) {
-      await prisma.category.update({
-        where: { id: childId },
-        data: { parentId },
-      });
-    }
   }
 
   console.log(`Created ${DEFAULT_CATEGORIES.length} categories`);

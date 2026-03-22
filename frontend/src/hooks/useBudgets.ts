@@ -1,11 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { budgetsApi } from '../lib/api';
-import type { Budget, CreateBudgetInput, UpdateBudgetInput } from '../types';
+import type { Budget, CreateBudgetInput, UpdateBudgetInput, CategoryBudgetRow } from '../types';
 
 export function useBudgets() {
   return useQuery<Budget[]>({
     queryKey: ['budgets'],
     queryFn: budgetsApi.list,
+  });
+}
+
+export function useBudgetOverview() {
+  return useQuery<CategoryBudgetRow[]>({
+    queryKey: ['budgets', 'overview'],
+    queryFn: budgetsApi.overview,
   });
 }
 

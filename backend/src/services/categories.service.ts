@@ -6,7 +6,6 @@ export interface CreateCategoryInput {
   color: string;
   icon?: string;
   sortOrder?: number;
-  parentId?: string;
 }
 
 export interface UpdateCategoryInput {
@@ -15,7 +14,6 @@ export interface UpdateCategoryInput {
   color?: string;
   icon?: string | null;
   sortOrder?: number;
-  parentId?: string | null;
 }
 
 export interface ReorderCategoryInput {
@@ -30,13 +28,12 @@ export const DEFAULT_CATEGORIES = [
   { name: 'GADGET', label: 'Gadget', color: '#8b5cf6', icon: 'device-mobile', sortOrder: 2, isSystem: true },
   { name: 'CLOTHES', label: 'Clothes', color: '#ec4899', icon: 'shopping-bag', sortOrder: 3, isSystem: true },
   { name: 'CAR', label: 'Car', color: '#f97316', icon: 'truck', sortOrder: 4, isSystem: true },
-  { name: 'CAR_MAINTENANCE', label: 'Car Maintenance', color: '#f59e0b', icon: 'wrench', sortOrder: 5, isSystem: true },
-  { name: 'BAKERY', label: 'Bakery', color: '#a855f7', icon: 'cake', sortOrder: 6, isSystem: true },
-  { name: 'FOOD_DINING', label: 'Food & Dining', color: '#ef4444', icon: 'fire', sortOrder: 7, isSystem: true },
-  { name: 'ENTERTAINMENT', label: 'Entertainment', color: '#06b6d4', icon: 'film', sortOrder: 8, isSystem: true },
-  { name: 'TRAVEL', label: 'Travel', color: '#14b8a6', icon: 'globe', sortOrder: 9, isSystem: true },
-  { name: 'FIXED', label: 'Fixed', color: '#6b7280', icon: 'calendar', sortOrder: 10, isSystem: true },
-  { name: 'OTHERS', label: 'Others', color: '#9ca3af', icon: 'dots-horizontal', sortOrder: 11, isSystem: true },
+  { name: 'BAKERY', label: 'Bakery', color: '#a855f7', icon: 'cake', sortOrder: 5, isSystem: true },
+  { name: 'FOOD_DINING', label: 'Food & Dining', color: '#ef4444', icon: 'fire', sortOrder: 6, isSystem: true },
+  { name: 'ENTERTAINMENT', label: 'Entertainment', color: '#06b6d4', icon: 'film', sortOrder: 7, isSystem: true },
+  { name: 'TRAVEL', label: 'Travel', color: '#14b8a6', icon: 'globe', sortOrder: 8, isSystem: true },
+  { name: 'FIXED', label: 'Fixed', color: '#6b7280', icon: 'calendar', sortOrder: 9, isSystem: true },
+  { name: 'OTHERS', label: 'Others', color: '#9ca3af', icon: 'dots-horizontal', sortOrder: 10, isSystem: true },
 ];
 
 export function createCategoriesService(prisma: PrismaClient) {
@@ -97,7 +94,6 @@ export function createCategoriesService(prisma: PrismaClient) {
           icon: input.icon,
           sortOrder,
           isSystem: false,
-          parentId: input.parentId || null,
           householdId,
         },
       });
@@ -132,7 +128,6 @@ export function createCategoriesService(prisma: PrismaClient) {
           color: input.color,
           icon: input.icon,
           sortOrder: input.sortOrder,
-          parentId: input.parentId !== undefined ? input.parentId : undefined,
         },
       });
 
@@ -221,26 +216,6 @@ export function createCategoriesService(prisma: PrismaClient) {
           householdId,
         })),
       });
-
-      // Set sub-category relationships
-      const SUB_CATEGORY_RELATIONS: Record<string, string> = {
-        CAR_MAINTENANCE: 'CAR',
-      };
-
-      for (const [childName, parentName] of Object.entries(SUB_CATEGORY_RELATIONS)) {
-        const child = await prisma.category.findFirst({
-          where: { householdId, name: childName },
-        });
-        const parent = await prisma.category.findFirst({
-          where: { householdId, name: parentName },
-        });
-        if (child && parent) {
-          await prisma.category.update({
-            where: { id: child.id },
-            data: { parentId: parent.id },
-          });
-        }
-      }
     },
 
     async ensureHouseholdHasCategories(householdId: string) {

@@ -8,8 +8,6 @@ export interface Category {
   icon: string | null;
   sortOrder: number;
   isSystem: boolean;
-  parentId: string | null;
-  children?: Category[];
   createdAt: string;
   updatedAt: string;
 }
@@ -20,7 +18,6 @@ export interface CreateCategoryInput {
   color: string;
   icon?: string;
   sortOrder?: number;
-  parentId?: string;
 }
 
 export interface UpdateCategoryInput {
@@ -29,7 +26,6 @@ export interface UpdateCategoryInput {
   color?: string;
   icon?: string | null;
   sortOrder?: number;
-  parentId?: string | null;
 }
 
 export interface ReorderCategoryInput {
@@ -158,6 +154,12 @@ export interface CreateBudgetInput {
 
 export interface UpdateBudgetInput {
   monthlyLimit: number;
+}
+
+export interface CategoryBudgetRow {
+  category: Category;
+  budget: { id: string; monthlyLimit: number } | null;
+  spent: number;
 }
 
 // Statement

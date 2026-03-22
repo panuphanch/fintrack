@@ -7,7 +7,7 @@ const makeBudget = (overrides: Partial<Budget> & { spent?: number } = {}): Budge
   id: 'b1',
   householdId: 'h1',
   categoryId: 'cat-1',
-  category: { id: 'cat-1', householdId: 'h1', name: 'FOOD', label: 'Food', color: '#ef4444', icon: null, sortOrder: 0, isSystem: true, parentId: null, createdAt: '', updatedAt: '' },
+  category: { id: 'cat-1', householdId: 'h1', name: 'FOOD', label: 'Food', color: '#ef4444', icon: null, sortOrder: 0, isSystem: true, createdAt: '', updatedAt: '' },
   monthlyLimit: 10000,
   spent: 3000,
   createdAt: '',
@@ -16,7 +16,7 @@ const makeBudget = (overrides: Partial<Budget> & { spent?: number } = {}): Budge
 
 function renderBudgets(budgets: Budget[]) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <BudgetProgress budgets={budgets} />
     </MemoryRouter>
   );

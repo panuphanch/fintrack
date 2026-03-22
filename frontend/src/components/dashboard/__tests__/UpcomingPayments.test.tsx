@@ -5,7 +5,7 @@ import type { Installment, FixedCost, Category } from '../../../types';
 
 const mockCategory: Category = {
   id: 'cat-1', householdId: 'h1', name: 'GADGET', label: 'Gadget', color: '#8b5cf6',
-  icon: null, sortOrder: 0, isSystem: true, parentId: null, createdAt: '', updatedAt: '',
+  icon: null, sortOrder: 0, isSystem: true, createdAt: '', updatedAt: '',
 };
 
 const mockInstallment: Installment = {
@@ -27,7 +27,7 @@ const mockFixedCost: FixedCost = {
 
 function renderPayments(installments: Installment[] = [], fixedCosts: FixedCost[] = []) {
   return render(
-    <MemoryRouter>
+    <MemoryRouter future={{ v7_startTransition: true, v7_relativeSplatPath: true }}>
       <UpcomingPayments installments={installments} fixedCosts={fixedCosts} />
     </MemoryRouter>
   );

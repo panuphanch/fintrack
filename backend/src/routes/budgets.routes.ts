@@ -9,6 +9,27 @@ export async function budgetsRoutes(fastify: FastifyInstance) {
   // Require authentication for all routes
   fastify.addHook('preHandler', fastify.authenticate);
 
+  // Budget overview: all categories with spending and optional budget data
+  fastify.get(
+    '/overview',
+    async (request: FastifyRequest, reply) => {
+      try {
+        const overview = await budgetsService.listWithAllCategories(request.jwtPayload.householdId);
+        return reply.send({
+          success: true,
+          data: overview,
+        });
+      } catch (error) {
+        const message = error instanceof Error ? error.message : 'Failed to load budget overview';
+        fastify.log.error(error);
+        return reply.status(500).send({
+          success: false,
+          error: message,
+        });
+      }
+    }
+  );
+
   // List all budgets with current spending
   fastify.get(
     '/',
